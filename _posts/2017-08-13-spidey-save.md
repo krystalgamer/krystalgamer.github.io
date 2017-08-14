@@ -13,7 +13,7 @@ tags: [krystalgamer spiderman pc save saves crc checksum]
 #### *What's the purpose of your save file editor if you already have cheat codes?*
 {: .center}
 
-First of all, this was my first time ever reversing a save file format and I had no ideia of the existence of the cheat codes(only mid-development I did find they existed, which made testing **so much easier**). The reason I started to code this tool was because [some levels become unbeatable](https://www.youtube.com/watch?v=jBqtWnFQX5Y) if your FPS are not capped 30 due to this game being a shitty port.
+First of all, this was my first time ever reversing a save file format and I had no idea of the existence of the cheat codes(only mid-development I did find they existed, which made testing **so much easier**). The reason I started to code this tool was because [some levels become unbeatable](https://www.youtube.com/watch?v=jBqtWnFQX5Y) if your FPS are not capped 30 due to this game being a shitty port.
 
 # How it was done
 {: .center}
@@ -38,7 +38,7 @@ The game must use kind of protection. In order to find what's going on I restore
 
 What should've been a no-brainer became a really boring and tedious task to accomplish just because I didn't stop to think. After locating the `Load Save Game` routine I should've put a hardware breakpoint on access on the checksum and wait for it to stop on a `TEST` or a `CMP`, but nope, this is what I did instead(and what you **should avoid**):
 
-* Place a hardware breakpoint on the save slot name. This was a **terrible** ideia because the name is not only used to verify the integrity but also is rendered on the screen, this means most of the breakpoints would've been on a `MOV` leading me to the guess game.
+* Place a hardware breakpoint on the save slot name. This was a **terrible** idea because the name is not only used to verify the integrity but also is rendered on the screen, this means most of the breakpoints would've been on a `MOV` leading me to the guess game.
 
 * Try to find the save slot in memory before it was written to the disk.. Not only it tricked me into thinking I've found checksum routine but made me really mad. (don't even try to do this)
 
