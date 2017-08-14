@@ -23,7 +23,7 @@ To start I needed to locate the save file location. The most common places are i
 # Let's dissect it
 {: .center}
 
-The game uses save slots and they must have a name. So right after opening SPIDRMAN.DAT with and hex-editor, in my case HxD, I made a string search for the name I had chosen for the first slot(it was `AAAAAAAA`). It was found at the offset 0x243 with no more appearances in the file, which is good.
+The game uses save slots and they must have a name. So right after opening SPIDRMAN.DAT with an hex-editor, in my case HxD, I made a string search for the name I had chosen for the first slot(it was `AAAAAAAA`). It was found at the offset 0x243 with no more appearances in the file, which is good.
 
 ![String search result]({{ site.github.url }}/images/spidey/hxd_aa.png)
 
