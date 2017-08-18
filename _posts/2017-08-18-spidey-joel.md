@@ -2,6 +2,7 @@
 layout: post
 title: "Reversing: Spiderman 2000 - Re-enabling Joel Jewett Cheat Code"
 description: "Re-enabling an old cheat code"
+tags: [krystalgamer spiderman 2000 pc joel jewett cheat code enable disable reversing]
 comments: true
 modified: 2017-08-18
 ---
