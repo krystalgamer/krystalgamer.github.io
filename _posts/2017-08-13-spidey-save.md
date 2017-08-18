@@ -18,7 +18,7 @@ First of all, this was my first time ever reversing a save file format and I had
 # How it was done
 {: .center}
 
-To start I needed to locate the save file location. The most common places are in `My Documents` or in the game's directory. In this case it was easy, it's a file called SPIDRMAN.DAT that is inside a direcory called `save` which is indeed in the game's directory. If you are trying to do the same but with another game but still can't find it, search online or try to find references of "save files" in the game's code through static analysis(IDA Pro, Radare2,..) or dynamic analysis(x64Dbg, OllyDbg,...). 
+To start I needed to locate the save file location. The most common places are in `My Documents` or in the game's directory. In this case it was easy, it's a file called SPIDRMAN.DAT that is inside a directory called `save` which is indeed in the game's directory. If you are trying to do the same but with another game but still can't find it, search online or try to find references of "save files" in the game's code through static analysis(IDA Pro, Radare2,..) or dynamic analysis(x64Dbg, OllyDbg,...). 
 
 # Let's dissect it
 {: .center}
@@ -61,3 +61,8 @@ Here's graphs of the checksum routine:
 All of this culminated with the first version of my save game editor that only contained the [CalculateChecksum](https://github.com/krystalgamer/spidey-tools/blob/master/save_editor/save.c#L35-L50) function.
 
 *If you're interested in knowing how the game stores the info I'll be covering it in the next post*
+
+
+{% include disqus.html %}
+
+gsfdg

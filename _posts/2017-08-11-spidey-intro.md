@@ -17,7 +17,7 @@ During this series I'll be sharing my experience about reversing the game Spider
 {: .center}
 
 This is not the first game I've reversed but this is the **FIRST** PC Port that I've reversed and let me tell you it's a really bad port. Spiderman PC games have a bad reputation due to being lazy ports(such as this one) and [total garbage](https://www.youtube.com/watch?v=pOU6HVSL6a8) because Activision neglected the PC market. Luckily they left a bunch of debug messages in the code but **disabled the debug print** for whatever reason.
-This helped me a lot during my initial first-steps with the game because I could easily have a general ideia of what I was supposedly looking at.
+This helped me a lot during my initial first-steps with the game because I could easily have a general idea of what I was supposedly looking at.
 
 ## Will you cover every tool you've posted on your repository?
 {: .center}
@@ -26,3 +26,5 @@ YES! I have so much to say about each one(except texture-repacker, by far the mo
 
 
 *Well... That's all folks stay tuned for future posts ;)*
+
+{% include disqus.html %}

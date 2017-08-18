@@ -7,3 +7,4 @@ tag: [first post blog krystalgamer hello world]
 ---
 I'll post here about my findings and stuff i find interesting.
 
+{% include disqus.html %}
