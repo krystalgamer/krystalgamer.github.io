@@ -64,5 +64,3 @@ All of this culminated with the first version of my save game editor that only c
 
 
 {% include disqus.html %}
-
-gsfdg

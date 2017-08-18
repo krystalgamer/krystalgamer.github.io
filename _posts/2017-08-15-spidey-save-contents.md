@@ -1,0 +1,47 @@
+---
+layout: post
+title: "Reversing: Spiderman 2000 - Save file contents"
+description: "A look how the game progress is stored in the save slot"
+modified: 2017-08-15
+tags: [krystalgamer spiderman pc save saves contens skins progress]
+comments: true
+---
+
+## Quick recap
+{: .center}
+
+The last post ended with me being able to generate the correct checksum for the save slots. This means regardless of its contents being valid according to the game I'm now able to load my custom save files.
+
+# Current level
+{: .center}
+
+As I said this game becomes unbeatable at certain levels so this was the first thing I looked for. Looking at the available strings in the save slot there was one that caught my attention, `l1a1_t`, it really looked like "Level 1 Area 1". So I decided to check in IDA if there were any references:
+
+![String search in IDA]({{ site.github.url }}/images/spidey/level_strings.png)
+
+Awesome! Not only it is referenced but the level names are intercalated with the respective level codes(lXaX_t). 
+
+## Time to test
+{: .center}
+
+I modified the string to `l1a2_t` and corrected the checksum. The save loaded correctly and it was displaying the correct string "Bank Approach" in the main menu, unfortunately it was still the first level... Since the levels don't contain the same number of areas the developers took the easy way out and have 2 references to the current level in the save file, one is for the string the other is for the actual level.
+
+## Finding the real level
+{: .center}
+
+This one was actually easy. Instead of trying to find it through the dissassembly I just played the first few areas and compared the saves. While I was progressing through each area, more and more bytes were turning from 0 to 1(one per level), starting at 0x56. Basically for each area that's beaten the byte that corressponds to its index is set to 1. When you finish the game the byte at position 0x55 is also set to 1. 
+
+![Level array]({{ site.github.url }}/images/spidey/level_array.png)
+
+##### *Since we're at the start of the game all the bytes are set to 0*
+{: .center}
+
+# Costumes
+{: .center}
+
+## Current costume
+{: .center}
+
+
+It was at this moment that I found the existence of cheat codes. To find how they were stored I'd simply input the code save and check the differences
+
