@@ -4,7 +4,7 @@ title: "Reversing: Spiderman 2000 - Save file protection"
 description: "Protection mechanism of the save files"
 modified: 2017-08-14
 comments: true
-tags: [krystalgamer spiderman pc save saves crc checksum]
+tags: [krystalgamer, spiderman, pc, save, saves, crc, checksum]
 ---
 
 ## Intro

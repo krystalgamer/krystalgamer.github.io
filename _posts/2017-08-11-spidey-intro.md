@@ -4,7 +4,7 @@ title: "Reversing: Spiderman 2000 - Introduction"
 description: "Small introduction to a part series of posts about my experience with Spiderman 2000 (PC Version)"
 modified: 2017-08-11
 comments: true
-tags: [krystalgamer spiderman pc introduction 2000]
+tags: [krystalgamer, spiderman, pc, introduction, spiderman 2000]
 ---
 
 ## The start
