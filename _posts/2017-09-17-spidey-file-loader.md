@@ -43,7 +43,7 @@ My first idea was to write a program that started `spidey.exe` with the SUSPENDE
 That was when I thought in proxying a game's DLL, the one I chose was `binkw32.dll`(It is used to load and play the game's cutscenes, the *bik* files). Although this process is mostly used to detour the calls to a certain DLL, here I used it to install my loader before the game reaches its entry-point (running my code before the game starts).
 Using a tools such as [ExportToC++](https://github.com/michaellandi/exportstoc) it's a really easy process. It basically redirects **all** the calls to `binkw32` to the original one, so one less thing to worry about.
 
-## Writting the loader
+## Writing the loader
 {: .center}
 
 Here's the [interesting part](https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L266-L288) from my loader.
