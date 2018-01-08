@@ -29,7 +29,7 @@ Finally built my rig! Here are the specs:
 * A case from NOX with a windows :)
 * BenQ GL2450 24'' FHD Monitor
 
-Periferals:
+Peripherals:
 * Fnatic Gear Rush G1 (MX Brown)
 * MSI Interceptor Mouse
 * Gamecom Plantronics 380
