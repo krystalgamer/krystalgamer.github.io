@@ -110,11 +110,11 @@ By the way, the `260` and `261` are `WM_SYSKEY(UP/DOWN)` messages, the game is f
 
 # CheckCD exploration
 
-![cdrom check]({{ site.github.url }}/images/spidey/cdrom_graph.png)
+![cdrom check]({{ site.github.url }}/images/spidey/cdcheck_graph.png)
 
 As you can see there's a call to `sub_516250` which does something with `texture.dat`. What does it do? No idea, it opens it, gets its size, reads the contents and performs some wonky stuff with it. If any of those tasks fails then it returns 0 which makes `CheckCD` return 2, else it will return a position of the texture.dat buffer.
 
-![cdrom check]({{ site.github.url }}/images/spidey/cdrom_graph2.png)
+![cdrom check]({{ site.github.url }}/images/spidey/cdcheck_graph2.png)
 
 There's some string copy and finally `sub_516470` is called and the result negated and AND'd with 3, which is not a problem since the negation of zero is still zero and 3 AND 0 is still 0.
 
