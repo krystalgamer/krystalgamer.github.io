@@ -176,7 +176,7 @@ for index,_ in enumerate(final[4:]):
 with open("texture.dat", "wb") as f:
     f.write(final)
 ```
-
+The string with the hex characters - `\x00` - must respect the utf-8 encoding. That caused lots of problems, that the string `\xB8` would be converted to `\xC2\xB8`, that is why I split the logic.
 
 ## Shellcode
 
