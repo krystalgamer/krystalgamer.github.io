@@ -184,4 +184,3 @@ After a lot of blood, sweat and tears I got the custom file loader!
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/9pKgImkkGBI" frameborder="0" allowfullscreen></iframe>
 
-{% include disqus.html %}

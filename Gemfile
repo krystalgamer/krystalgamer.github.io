@@ -1,8 +1,8 @@
 source "https://rubygems.org"
 
-gem "json"
-gem "jekyll"
-gem "jekyll-sitemap"
-gem "jekyll-feed"
-gem "jekyll-paginate"
-gem "jekyll-gist"
+gem 'octopress'
+gem 'jekyll-paginate'
+gem 'neo-hpstr-jekyll-theme'
+
+gem "tzinfo", "~> 2.0"
+gem "tzinfo-data", "~> 1.2019"

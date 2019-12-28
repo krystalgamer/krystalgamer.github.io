@@ -41,6 +41,3 @@ At the moment I'm finishing a TRG disassembler but right after I'm done I'll ref
 {: .center}
 
 Download [here]({{ site.github.url }}/files/Spider-Man)
-
-{% include disqus.html %}
-

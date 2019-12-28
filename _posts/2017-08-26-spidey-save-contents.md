@@ -73,4 +73,3 @@ And here's a video of it in action:
 {: .center}
 <iframe width="560" height="315" src="https://www.youtube.com/embed/ScPe5oTNv8E" frameborder="0" allowfullscreen></iframe>
 
-{% include disqus.html %}

@@ -108,4 +108,3 @@ Implementing it was the hardest part, during this period I got so many crashes t
 
 If you're interested in reading my implementation you can [checkout my github](https://github.com/krystalgamer/spidey-tools/tree/master/pkr_extractor).
 
-{% include disqus.html %}

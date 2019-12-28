@@ -71,5 +71,3 @@ Lastly, `sub_47C240` is the actual function where the cheat is activated if the 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/H-bs5sTNDmc" frameborder="0" allowfullscreen></iframe>
 *This post wasn't meant to come this earlier but the one one I was writing is taking more time*
-
-{% include disqus.html %}

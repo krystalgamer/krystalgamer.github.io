@@ -26,5 +26,3 @@ YES! I have so much to say about each one(except texture-repacker, by far the mo
 
 
 *Well... That's all folks stay tuned for future posts ;)*
-
-{% include disqus.html %}

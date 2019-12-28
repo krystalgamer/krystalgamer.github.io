@@ -70,5 +70,3 @@ If the name isn't clear then wait for the release ;).
 I'm also learning more about binary exploiting and pwning since it's an area that really interests me, so expect some posts about CTFs and binary reversing that aren't games. See you on the next post!
 
 P.S - Happy (LATE) new year!
-
-{% include disqus.html %}

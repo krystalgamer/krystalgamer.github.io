@@ -179,5 +179,3 @@ Comes from here
 ```
 
 Concluding, the  loop instead of `while(1)` should be `while(v19 < 26)` because otherwise it would go beyond the letter Z, the last letter of the alphabet. And that's why pseudocode should always be taken as a grain of salt.
-
-{% include disqus.html %}

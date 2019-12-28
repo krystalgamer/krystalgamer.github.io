@@ -62,5 +62,3 @@ All of this culminated with the first version of my save game editor that only c
 
 *If you're interested in knowing how the game stores the info I'll be covering it in the next post*
 
-
-{% include disqus.html %}
