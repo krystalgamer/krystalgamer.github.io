@@ -20,6 +20,7 @@ url: http://krystalgamer.github.io
 menu:
   - title: 'Home'
     url: '/'
+    #
 # Owner/author information
 owner:
   name:           krystalgamer
