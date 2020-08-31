@@ -41,7 +41,7 @@ Having some experience with games that use HTTPS, such as [Shakes and Fidget](ht
 
 
 This part got me scared since the game uses Denuvo which contributes to its 400MB of executable size. I wanted to avoid messing its anti-tamper measures.
-To verify where the traffic comes from within the game using `x64dbg` I placed a breakpoint at `getadrinfo` in `ws2_32.dll`. When the breakpoint was hit reading the callstack showed where it came from, it was `osdk.dll`. This module was shipped with the game and until that moment I was not aware of its existence.
+To verify where the traffic comes from within the game using `x64dbg` I placed a breakpoint at `getaddrinfo` in `ws2_32.dll`. When the breakpoint was hit reading the callstack showed where it came from, it was `osdk.dll`. This module was shipped with the game and until that moment I was not aware of its existence.
 
 The next step was to see what it exports:
 
