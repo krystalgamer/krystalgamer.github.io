@@ -757,7 +757,7 @@ This patch allows for the client to be installed just by simple drag-n-drop, no 
 
 ## Source code
 
-You can find the source code and binaries at: [MarvelsAvengers](https://github.com/krystalgamer/MarvelsAvengers) (Currently down)
+You can find the source code and binaries at: [MarvelAvengers](https://github.com/krystalgamer/MarvelAvengers)
 
 
 Video showcasing the emulator:
