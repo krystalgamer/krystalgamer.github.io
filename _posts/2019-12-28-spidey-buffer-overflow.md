@@ -9,7 +9,7 @@ comments: false
 ---
 
 # Background
-{: .center}
+
 
 At the end of this year(2019) I decided to completly reverse engineer the game Spider-Man 2000 for the PC in order to be able to fix all of its problems and possibly port it to more architectures and OS(es).
 During my second stream I was working on the routine that loads the file `texture.dat` and noticed that the buffer not only in allocated in the stack but there's no boundary check.
@@ -18,7 +18,7 @@ During my second stream I was working on the routine that loads the file `textur
 
 
 # The vulnerability
-{: .center}
+
 
 `sub_5163E0` calls `sub_516250` to load `texture.dat` and passes a local variable as a buffer.
 ```c

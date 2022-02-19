@@ -9,19 +9,19 @@ comments: true
 ---
 
 # Motivation to do it
-{: .center}
+
 
 Right after the first version of the PKR extractor I was thrilled and wanted to explore more of the game's files. Unfortunately I was only able to extract the files, repacking them is another story. Although [kamiloxnumetal already had released tools able to unpack and repack PKR](http://www.thps-mods.com/forum/viewtopic.php?t=796), having to do it every **single** time I modified a file is insane.
 
 
 # Finding the responsible function
-{: .center}
+
 
 While reversing it was clear that the game setups internally all the information of the PKRDirs and PKRFiles, after that the PKR file is simply used to load the files. This made things easier since there was only one function that I needed to focus. 
 
 
-![Read file of PKR]({{ site.github.url }}/images/spidey/spidey_readfile.png)
-{: .center}
+![Read file of PKR](images/spidey/spidey_readfile.png)
+
 
 Here's the function I was talking about, it starts at 0x00519194. This is the relevant part where all the magic happens, if you're curious of what happens before what is shown in the picture it goes to a specific PKRDir and searches if there's an entry of the specified file name. If there is then it performs some sanity checks and then proceeds to get the file. Here's the order of things:
 
@@ -33,10 +33,10 @@ Here's the function I was talking about, it starts at 0x00519194. This is the re
 As you can see the only if the CRCCheck succeeds the `a4` and `a5` parameters are set and that is the **only** case the function returns 1(true). Awesome! `a4` and `a5` are definitely "out" parameters that store the buffer of the file and the size, respectively.
 
 # Writing the loader
-{: .center}
+
 
 ## Getting the code to run
-{: .center}
+
 
 My first idea was to write a program that started `spidey.exe` with the SUSPENDED flag and then I'd inject the loader. Unfortunately this isn't so easy as it seems because when you start a process with the SUSPENDED flag the needed structures for DLL loading are not setup yet. There are [some tricky ways to do so](https://opcode0x90.wordpress.com/2011/01/15/injecting-dll-into-process-on-load/) and I even thought in trying to suspend the process right after it started but it still wasn't the best way.
 
@@ -44,7 +44,7 @@ That was when I thought in proxying a game's DLL, the one I chose was `binkw32.d
 Using a tools such as [ExportToC++](https://github.com/michaellandi/exportstoc) it's a really easy process. It basically redirects **all** the calls to `binkw32` to the original one, so one less thing to worry about.
 
 ## Writing the loader
-{: .center}
+
 
 Here's the [interesting part](https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L266-L288) from my loader.
 
@@ -88,10 +88,10 @@ The comments I left are not 100% accurate since I wrote them at the start and fo
 * Lastly, `SetMemory` was used to disable a internal CRC check that was causing some problems.
 
 ## The actual file loading 
-{: .center}
+
 
 ### File name setup
-{: .center}
+
 
 The snippet is from [here](https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L157-L182).
 
@@ -179,7 +179,7 @@ Nothing special about this one, it's a regular file loading routine. Until my la
 
 
 # That's all folks!
-{: .center}
+
 After a lot of blood, sweat and tears I got the custom file loader!
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/9pKgImkkGBI" frameborder="0" allowfullscreen></iframe>

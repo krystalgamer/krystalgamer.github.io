@@ -4,12 +4,12 @@ title: "Reverse Engineering: Marvel's Avengers - Developing a Server Emulator"
 description: "Documentation of reversal and building of a Marvel's Avenger server emulator"
 created: 2020-08-24
 modified: 2020-08-24
-comments: false
 tags: [marvel, avengers, protection, protection, spiderman 2000, reverse engineering, ida pro, curl, osdk, exploiting, buffer overflow, x64, tls, wireshark, fiddler, packet dumper, packet, denuvo, wireshark, shakes and fidget, fiddler]
+comments: false
 ---
 
 # Context
-{: .center}
+
 
 During these past two weeks I had the chance to play the Marvel's Avengers Beta. The game allows the player to player solo or hop into matchmaking to find some squad-mates.
 Even playing solo it was clear that the game needed internet connectivity. Having already played last week during the closed-beta I decided to use the new open-beta to explore more about the game's networking.
@@ -32,7 +32,7 @@ If the goal is to develop an emulator then there's extra steps:
 
 
 ## Understanding the traffic
-{: .center}
+
 
 I started by opening `Wireshark` and checking how my actions impact the traffic. During the game's boot there's nothing happening, pressing the `Start` button in the main menu the game performs a DNS query of `cry-trmv6-beta.os.eidos.com` followed by setting up a TLS connection to the return IP. This indicates that the protocol being HTTPS - it's nice since it well known but it's encrypted which hurts readibility and tamperability.
 

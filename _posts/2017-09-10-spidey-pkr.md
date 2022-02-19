@@ -2,20 +2,20 @@
 layout: post
 title: "Reversing: Spiderman 2000 - PKR file format"
 description: "An analysis on the container file format."
-started: 2017-09-10
+created: 2017-09-10
 modified: 2017-09-10
-comments: true
 tags: [spidey, spiderman 2000, spiderman, pkr, pkr3]
+comments: true
 ---
 
 # What is it?
-{: .center}
+
 
 It's a container format used to store all the game's files. It was developed by Neversoft and is most known for its use on "Tony Hawk Pro Skater" game series.
 Since it contains all game files in order to modify anything we need to know what is going on.
 
 # Structure
-{: .center}
+
 
 ```c
 typedef struct{
@@ -26,15 +26,15 @@ typedef struct{
 
 The files start with a magic number `PKR3` followed by an offset to the directory tree header.
 
-![PKR Header]({{ site.github.url }}/images/spidey/pkr_header.png)
-{: .center}
+![PKR Header](images/spidey/pkr_header.png)
+
 
 As you can see after the offset there are the words `RIFF` and `WAVE` which are also magic numbers of [WAV files](http://soundfile.sapp.org/doc/WaveFormat/). Due to the fact that `spidey.exe` contains a lot of file names this mislead me. Initally I thought this files had no structure and were just a bunch of files merged together. Thankfully there are a lot of references in the code to the functions responsible to handle PKR files.
 
-![PKR references]({{ site.github.url }}/images/spidey/pkr_strings.png) 
+![PKR references](images/spidey/pkr_strings.png) 
 
 ## Dir structure
-{: .center}
+
 
 ## The header
 
@@ -91,15 +91,15 @@ As you can see the game files have integrity checks, in this case it's actually 
 
 
 Here's how all these structures look in the file:
-{:.center}
 
-![PKR structure]({{ site.github.url }}/images/spidey/pkr_inside.png)
+
+![PKR structure](images/spidey/pkr_inside.png)
 
 ### Green is the PKRDirHeader, red the PKRDirs and blue the PKRFiles.
-{:.center}
+
 
 ## Compression method
-{: .center}
+
 
 The files are compressed using zlib. Finding it was a piece of cake, again there are **a lot** of references in the strings.
 

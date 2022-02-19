@@ -9,7 +9,7 @@ comments: true
 ---
 
 # Prologue
-{: .center}
+
 
 Spiderman was acting wonky with DxWnd after a long time working just fine (it happened to me before but it magically got solved, I think it might be Win10 related since the Win7 VM works perfectly). Not knowing the causes I decided to delete the game and reinstall it. Here comes the fuck up, I had my idb in the game folder. I wasn't able to recover it.
 
@@ -17,16 +17,16 @@ Now I had an uncracked game.
 
 
 # Diving into the problem
-{: .center}
+
 
 Starting the game I was prompted with the message `Please insert the Spider-Man CD-ROM, select OK, and restart the game.`. Not bad, time to xref on IDA.
 
-![xref of the string]({{ site.github.url }}/images/spidey/cdrom_xref.png)
-{: .center}
+![xref of the string](images/spidey/cdrom_xref.png)
+
 
 What the..? Why there's two of them? The WinMain has you can already guess is the one that prompts when I start the game. The other is from the window handler function.
 
-![graph window handler]({{ site.github.url }}/images/spidey/graph_cdrom_handler.png)
+![graph window handler](images/spidey/graph_cdrom_handler.png)
 
 As you can see IDA could understand that all of those locs are part of a jumptable which indicates me it's `switch` case and almost all of them lead to `DefWindowProcA`. If you have done any WinAPI programming you'd know that you call that when you don't want any special handling of certain window interactions and let the OS do it for you.
 
@@ -34,10 +34,10 @@ But which kind of message would make it prompt that message? I left it for now.
 
 
 # Disabling first CD-ROM protection
-{: .center}
 
 
-![graph winmain]({{ site.github.url }}/images/spidey/first_cdrom_protection.png)
+
+![graph winmain](images/spidey/first_cdrom_protection.png)
 
 Whatever the function is doing it must return 0. My approach to this problem was to simply `NOP` the function call and turn the `jz` to a `jmp`. It worked! The game started, I pressed `New Game` and... black screen, I start to see my desktop and game closes. What the hell was that?
 
@@ -110,11 +110,11 @@ By the way, the `260` and `261` are `WM_SYSKEY(UP/DOWN)` messages, the game is f
 
 # CheckCD exploration
 
-![cdrom check]({{ site.github.url }}/images/spidey/cdcheck_graph.png)
+![cdrom check](images/spidey/cdcheck_graph.png)
 
 As you can see there's a call to `sub_516250` which does something with `texture.dat`. What does it do? No idea, it opens it, gets its size, reads the contents and performs some wonky stuff with it. If any of those tasks fails then it returns 0 which makes `CheckCD` return 2, else it will return a position of the texture.dat buffer.
 
-![cdrom check]({{ site.github.url }}/images/spidey/cdcheck_graph2.png)
+![cdrom check](images/spidey/cdcheck_graph2.png)
 
 There's some string copy and finally `sub_516470` is called and the result negated and AND'd with 3, which is not a problem since the negation of zero is still zero and 3 AND 0 is still 0.
 
