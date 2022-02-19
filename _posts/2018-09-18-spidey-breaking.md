@@ -4,8 +4,8 @@ title: "Reversing: Spiderman 2000 - Breaking CD-ROM protection"
 description: "With the closing of the isozone, and missing the link of the available NO-CD patch I needed to crack it myself"
 created: 2018-09-17
 modified: 2018-09-18
-comments: true
 tags: [spiderman, cracking, protection, spiderman 2000, reverse engineering, ida pro]
+comments: true
 ---
 
 # Prologue

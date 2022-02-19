@@ -4,8 +4,8 @@ title: "Exploiting: Spiderman 2000 - Buffer overflow in file loading routine"
 description: "After reversing some routines of the game I stumbled upon a possible buffer overflow vulnerability that turned out to be exploitable"
 created: 2019-12-28
 modified: 2019-12-28
-comments: false
 tags: [spiderman, cracking, protection, spiderman 2000, reverse engineering, ida pro, exploiting, buffer overflow, x64]
+comments: false
 ---
 
 # Background
@@ -197,7 +197,7 @@ The address `spideypc.5159C8` contains a call to `MessageBoxA` followed by a `_e
 
 
 ## Result
-![result of buffer overflow ]({{ site.github.url }}/images/spidey/buffer_overflow.png)
+![result of buffer overflow ](images/spidey/buffer_overflow.png)
 
 
 ## Video of process
