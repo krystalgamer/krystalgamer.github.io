@@ -125,7 +125,7 @@ $ dumpbin -exports osdk.dll
 
 Some of the entries were removed due to being too long. This was my breakthrough, this library is responsible for the communications and it appears to be done in JSON! 
 
-Digging around the **strings** I noticed it was using `libcurl` which is also awesome, but also `libuv` which could pose serious problems for debugging and tracing. IDA wasn't picking cURL's function names so I had to use one of the community FLIRT databases, [FLIRTDB](<https://github.com/Maktm/FLIRTDB), which was key in finding functions such as `curl_easy_setopt`.
+Digging around the **strings** I noticed it was using `libcurl` which is also awesome, but also `libuv` which could pose serious problems for debugging and tracing. IDA wasn't picking cURL's function names so I had to use one of the community FLIRT databases, [FLIRTDB](https://github.com/Maktm/FLIRTDB), which was key in finding functions such as `curl_easy_setopt`.
 cURL has two interfaces the `easy` and the `multi`, the latter being focused in asynchronous programming. Even though it uses `libuv` all the connections are done via the **easy** interface.
 
 
