@@ -16,7 +16,7 @@
 			<div class="nav-holder">
 				<nav class="container">
 				<div class="logo-name">
-					<img class="logo" src="https://krystalgamer.github.io/images/logo.png" alt="krystalgamer's Lair">
+					<img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="krystalgamer's Lair">
 					<a href="{{ url_for('serve_main') }}">krystalgamer's Lair</a>
 				</div>
 				<a href="{{ url_for('about') }}">About</a>
@@ -24,7 +24,7 @@
 			</div>
 
 
-			<div class="header-bg">
+			<div class="header-bg" style="background-image: url({{ url_for('static', filename='banner.jpg')}})">
 			
 				<h1>
 					krystalgamer - Blog
