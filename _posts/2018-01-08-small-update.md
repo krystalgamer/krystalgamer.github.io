@@ -4,8 +4,7 @@ title: "Update on the blog"
 description: "What's been going on"
 created: 2018-01-08
 modified: 2018-01-08
-tag: [update, new year, 2018]
-comments: true
+tags: [update, new year, 2018]
 ---
 
 
