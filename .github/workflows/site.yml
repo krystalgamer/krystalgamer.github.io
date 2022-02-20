@@ -1,0 +1,38 @@
+name: Buid website
+
+on:
+  push:
+    branches: [ master]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with: 
+        python-version: '3.8'
+    - name: Install dependencies
+      run: python3 -m pip install krystal
+    - name: Build
+      run: krystal --build
+    - name: Put in gh-pages
+      run: |
+        touch build/.nojekyll
+        cd build
+        zip build.zip -r .
+        mv build.zip /tmp/build.zip
+        cd ..
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        rm -rf *
+        git checkout gh-pages
+        git pull
+        rm -rf *
+        unzip -o /tmp/build.zip -d .
+        git add -A
+        git commit -m "new commit auto-generated"
+        git push
+
