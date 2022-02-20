@@ -1,0 +1,86 @@
+<html>
+
+	<head>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="https://krystalgamer.github.io/images/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1>Reversing: Spiderman 2000 - Save file contents</h1></p>
+<h2>Quick recap</h2>
+<p>The last post ended with me being able to generate the correct checksum for the save slots. This means regardless of its contents being valid according to the game I'm now able to load my custom save files.</p>
+<h1>Current level</h1>
+<p>As I said this game becomes unbeatable at certain levels so this was the first thing I looked for. Looking at the available strings in the save slot there was one that caught my attention, <code>l1a1_t</code>, it really looked like &quot;Level 1 Area 1&quot;. So I decided to check in IDA if there were any references:</p>
+<p><img src="../static/images/spidey/level_strings.png" alt="String search in IDA" /></p>
+<p>Awesome! Not only it is referenced but the level names are intercalated with the respective level codes(lXaX_t). </p>
+<h2>Time to test</h2>
+<p>I modified the string to <code>l1a2_t</code> and corrected the checksum. The save loaded correctly and it was displaying the correct string &quot;Bank Approach&quot; in the main menu, unfortunately it was still the first level... Since the levels don't contain the same number of areas the developers took the easy way out and have 2 references to the current level in the save file, one is for the string the other is for the actual level.</p>
+<h2>Finding the real level</h2>
+<p>This one was actually easy. Instead of trying to find it through the disassembly I just played the first few areas and compared the saves. While I was progressing through each area, more and more bytes were turning from 0 to 1(one per level), starting at 0x56. Basically for each area that's beaten the byte that corresponds to its index is set to 1. When you finish the game the byte at position 0x55 is also set to 1. </p>
+<p><img src="../static/images/spidey/level_array.png" alt="Level array" /></p>
+<h5><em>Since we're at the start of the game all the bytes are set to 0</em></h5>
+<h1>Costumes</h1>
+<h2>Current costume</h2>
+<p>To find how they were stored I'd simply input the code save and check the differences in the file. At the offset 0x280(0x7C of the slot) that it saves the current ID of the costume the player is wearing:</p>
+<ol start="0">
+<li>SPIDERMAN</li>
+<li>SPIDERMAN 2099</li>
+<li>SYMBIOTE SPIDERMAN</li>
+<li>CAPTAIN UNIVERSE</li>
+<li>AMAZING BAG MAN</li>
+<li>SCARLET SPIDEY</li>
+<li>BEN REILLEY</li>
+<li>QUICK CHANGE</li>
+<li>PETER PARKER</li>
+</ol>
+<h2>Unlocked costumes</h2>
+<p>This one trickier to figure out. At the offset 0x284(0x80 of the slot) there's a DWORD that seems to change whenever you unlock a costume. If you unlock them in order it will simply increase from 1 to 1023(0x3FF). It's a bitmask and the first 9 bits represent the costumes. If it's 0 then it's locked, then it's unlocked. That's why it goes from 1(000000001) to 1023(111111111).</p>
+<h1>Storyboards, Comics..</h1>
+<p>This part doesn't really matter to me and since I've found out about cheat codes I stopped working on this.</p>
+<p>Make sure to check the source code of the save editor: <a href="https://github.com/krystalgamer/spidey-tools/tree/master/save_editor">HERE</a> </p>
+<p>And here's a video of it in action:</p>
+<p><div class="youtube-container"><iframe src="https://www.youtube.com/embed/ScPe5oTNv8E"" frameborder="0" allowfullscreen class="youtube-video"></iframe></div></p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2022 krystalgamer
+		</footer>
+	</body>
+
+</html>

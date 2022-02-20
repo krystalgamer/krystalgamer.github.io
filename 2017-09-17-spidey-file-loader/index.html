@@ -1,0 +1,192 @@
+<html>
+
+	<head>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="https://krystalgamer.github.io/images/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1>Spiderman 2000 - Writing the file loader</h1></p>
+<h1>Motivation to do it</h1>
+<p>Right after the first version of the PKR extractor I was thrilled and wanted to explore more of the game's files. Unfortunately I was only able to extract the files, repacking them is another story. Although <a href="http://www.thps-mods.com/forum/viewtopic.php?t=796">kamiloxnumetal already had released tools able to unpack and repack PKR</a>, having to do it every <strong>single</strong> time I modified a file is insane.</p>
+<h1>Finding the responsible function</h1>
+<p>While reversing it was clear that the game setups internally all the information of the PKRDirs and PKRFiles, after that the PKR file is simply used to load the files. This made things easier since there was only one function that I needed to focus. </p>
+<p><img src="../static/images/spidey/spidey_readfile.png" alt="Read file of PKR" /></p>
+<p>Here's the function I was talking about, it starts at 0x00519194. This is the relevant part where all the magic happens, if you're curious of what happens before what is shown in the picture it goes to a specific PKRDir and searches if there's an entry of the specified file name. If there is then it performs some sanity checks and then proceeds to get the file. Here's the order of things:</p>
+<ol>
+<li>Allocates a buffer with the size of the compressed file (<code>compressedSize</code> is equal to <code>uncompressedSize</code> in non-compressed files)</li>
+<li>Fseeks to the offset and reads the file to the buffer.</li>
+<li>Calls <code>sub_51AD0C</code> aka the decompression routine. If the file uncompressed it simply returns the buffer, if not it uncompresses the file, deletes the old buffer and returns the new one.</li>
+<li>Perfoms the CRC check</li>
+</ol>
+<p>As you can see the only if the CRCCheck succeeds the <code>a4</code> and <code>a5</code> parameters are set and that is the <strong>only</strong> case the function returns 1(true). Awesome! <code>a4</code> and <code>a5</code> are definitely &quot;out&quot; parameters that store the buffer of the file and the size, respectively.</p>
+<h1>Writing the loader</h1>
+<h2>Getting the code to run</h2>
+<p>My first idea was to write a program that started <code>spidey.exe</code> with the SUSPENDED flag and then I'd inject the loader. Unfortunately this isn't so easy as it seems because when you start a process with the SUSPENDED flag the needed structures for DLL loading are not setup yet. There are <a href="https://opcode0x90.wordpress.com/2011/01/15/injecting-dll-into-process-on-load/">some tricky ways to do so</a> and I even thought in trying to suspend the process right after it started but it still wasn't the best way.</p>
+<p>That was when I thought in proxying a game's DLL, the one I chose was <code>binkw32.dll</code>(It is used to load and play the game's cutscenes, the <em>bik</em> files). Although this process is mostly used to detour the calls to a certain DLL, here I used it to install my loader before the game reaches its entry-point (running my code before the game starts).
+Using a tools such as <a href="https://github.com/michaellandi/exportstoc">ExportToC++</a> it's a really easy process. It basically redirects <strong>all</strong> the calls to <code>binkw32</code> to the original one, so one less thing to worry about.</p>
+<h2>Writing the loader</h2>
+<p>Here's the <a href="https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L266-L288">interesting part</a> from my loader.</p>
+<div class="highlight"><pre><span></span><span class="c1">//Disable buffer allocation of pkr extracted file</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x000519375</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193A1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x000519375</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">	</span><span class="c1">//Disable fread of the file and the error</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x005193C5</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193CA</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x005193C5</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x005193D0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">twoByteJmp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x005193D2</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193FD</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x005193D2</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">jmpOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">DWORD</span><span class="p">)</span><span class="o">&amp;</span><span class="n">LoadFile</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051940C</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="c1">//Hook file loader function</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x00519408</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">jmpOffset</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="c1">//Disable CRC checks</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x0051942D</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00519445</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051942D</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x0051941E</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00519423</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051941E</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x0051AD70</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">retOp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+<p>Before actually starting to modifiy the game I decided to write two functions that would help me with the process of patching.
+<code>NopMemory</code> as the name indicates it NOPs(0x90) memory. The first parameter is the starting address and the second is the amount of bytes to patch.
+<code>SetMemory</code> receives as the first parameter an address to be written to. The second is the buffer that will be written and the third is the size of the buffer.</p>
+<p>The comments I left are not 100% accurate since I wrote them at the start and forgot to update them. So here's how they really work.</p>
+<ul>
+<li>The first <code>NopMemory</code> is correct and it's used to remove the buffer allocation(<strong>new (pkrFile.compressedSize</strong>)) because if I didn't do so it would cause a memory leak.</li>
+<li>The second one is used to disable the <em>fread</em> wrapper, because we're going to read the files from the disk.</li>
+<li>Then we have a <code>SetMemory</code>. Since I disabled the FreadWrapper it won't return anything. This means that the value that is in <strong>EAX</strong> will be the one to be checked if is 1. Unfortunately <strong>EAX</strong> holds the compressed file size which is never 1, thus requiring modifying the jump.</li>
+<li>The following <code>SetMemory</code> changes the call to the decompression routine to my LoadFile.</li>
+<li>The next <code>NopMemory</code>s are used to disable the CRC checks and the <em>delete</em> call.</li>
+<li>Lastly, <code>SetMemory</code> was used to disable a internal CRC check that was causing some problems.</li>
+</ul>
+<h2>The actual file loading</h2>
+<h3>File name setup</h3>
+<p>The snippet is from <a href="https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L157-L182">here</a>.</p>
+<div class="highlight"><pre><span></span><span class="kr">__declspec</span><span class="p">(</span><span class="kr">naked</span><span class="p">)</span><span class="w"> </span><span class="n">PVOID</span><span class="w"> </span><span class="n">LoadFile</span><span class="p">(</span><span class="n">PkrFile</span><span class="w"> </span><span class="o">*</span><span class="n">pkrFile</span><span class="p">,</span><span class="w"> </span><span class="n">PVOID</span><span class="w"> </span><span class="n">loadBuf</span><span class="p">,</span><span class="w"> </span><span class="n">DWORD</span><span class="w"> </span><span class="n">one</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">	</span><span class="kr">__asm</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="c1">//get the directory</span>
+<span class="w">		</span><span class="n">mov</span><span class="w"> </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0xA4</span><span class="p">]</span><span class="w"></span>
+<span class="w">		</span><span class="n">mov</span><span class="w"> </span><span class="n">originalDirectory</span><span class="p">,</span><span class="w"> </span><span class="n">eax</span><span class="w"></span>
+
+<span class="w">		</span><span class="c1">//Setups the path</span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">originalDirectory</span><span class="w"></span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">filePathAdd</span><span class="w"></span>
+<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">mystrcpy</span><span class="w"></span>
+<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"></span>
+
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="mh">0x20</span><span class="w"></span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span><span class="w"></span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">eax</span><span class="w"> </span><span class="c1">//Its in eax from strcpy</span>
+<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">strncat</span><span class="w"></span>
+<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="w"> </span><span class="mh">0xC</span><span class="w"></span>
+
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">LoadStub</span><span class="w"></span>
+<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="mi">4</span><span class="w"></span>
+<span class="w">		</span><span class="n">ret</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<p>As I said in the beginning, the function can only load a file by knowing its name and the directory it is inside. This means that using some math I can access the other function's stackframe and retrieve this information. After concatenating the directory with the file name it's ready to be loaded.</p>
+<p>Snippet from <a href="https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L107-L152">here</a>.</p>
+<div class="highlight"><pre><span></span><span class="n">PVOID</span><span class="w"> </span><span class="o">*</span><span class="nf">LoadStub</span><span class="p">(</span><span class="n">PkrFile</span><span class="w"> </span><span class="o">*</span><span class="n">pkrFile</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">HANDLE</span><span class="w"> </span><span class="n">hFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span><span class="w"> </span><span class="n">GENERIC_READ</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">OPEN_EXISTING</span><span class="p">,</span><span class="w"> </span><span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span><span class="w"></span>
+<span class="w">		</span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hFile</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error opening the file&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">fileSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetFileSize</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fileSize</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INVALID_FILE_SIZE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error getting size&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">pkrFile</span><span class="o">-&gt;</span><span class="n">uncompressedSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fileSize</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">UCHAR</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">fileSize</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">buffer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error creating buffer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">bytesRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ReadFile</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">fileSize</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">bytesRead</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error reading the file&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bytesRead</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">fileSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Not all bytes were read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span>
+<span class="w">	</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loaded %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">filePath</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">buffer</span><span class="p">;</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<p>Nothing special about this one, it's a regular file loading routine. Until my latest version it would crash if you modified a file with a bigger one, that was caused due to not modifying the <code>uncompressedSize</code>. After adding the <code>pkrFile-&gt;uncompressedSize = fileSize;</code> line it still didn't work, due to my PKRFile structure being incorrect. Thankfully I was able to fix this easily with the aid of x64dbg.</p>
+<h1>That's all folks!</h1>
+<p>After a lot of blood, sweat and tears I got the custom file loader!</p>
+<p><div class="youtube-container"><iframe src="https://www.youtube.com/embed/9pKgImkkGBI" frameborder="0" allowfullscreen class="youtube-video"></iframe></div></p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2022 krystalgamer
+		</footer>
+	</body>
+
+</html>

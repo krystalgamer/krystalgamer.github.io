@@ -1,0 +1,91 @@
+<html>
+
+	<head>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="https://krystalgamer.github.io/images/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1>Reversing: Spiderman 2000 - Save file protection</h1></p>
+<h2>Intro</h2>
+<h4><em>What's the purpose of your save file editor if you already have cheat codes?</em></h4>
+<p>First of all, this was my first time ever reversing a save file format and I had no idea of the existence of the cheat codes(only mid-development I did find they existed, which made testing <strong>so much easier</strong>). The reason I started to code this tool was because <a href="https://www.youtube.com/watch?v=jBqtWnFQX5Y">some levels become unbeatable</a> if your FPS are not capped 30 due to this game being a shitty port.</p>
+<h1>How it was done</h1>
+<p>To start I needed to locate the save file location. The most common places are in <code>My Documents</code> or in the game's directory. In this case it was easy, it's a file called SPIDRMAN.DAT that is inside a directory called <code>save</code> which is indeed in the game's directory. If you are trying to do the same but with another game but still can't find it, search online or try to find references of &quot;save files&quot; in the game's code through static analysis(IDA Pro, Radare2,..) or dynamic analysis(x64Dbg, OllyDbg,...). </p>
+<h1>Let's dissect it</h1>
+<p>The game uses save slots and they must have a name. So right after opening SPIDRMAN.DAT with an hex-editor, in my case HxD, I made a string search for the name I had chosen for the first slot(it was <code>AAAAAAAA</code>). It was found at the offset 0x243 with no more appearances in the file, which is good.</p>
+<p><img src="../static/images/spidey/hxd_aa.png" alt="String search result" /></p>
+<p>I tried to modify the name to <code>AAAAAAAB</code> and see if it worked... it didn't.
+<img src="../static/images/spidey/read_error.png" alt="Game has protection" /></p>
+<p>The game must use kind of protection. In order to find what's going on I restored the save file, loaded in-game and re-saved with the name <code>AAAAAAAB</code>. After that i run the compare function built-in HxD and found that there's a 3-byte difference between the corrupted save with the name <code>AAAAAAAB</code> and the one created by the game starting at 0x205. Three bytes is not common in the x86 architecture(as a general rule everything is 4-byte padded), so with more testing I found that it actually started at 0x204 but the differences in my first test were so minor that the value kept 1 byte intact. And what is this value? It's a <a href="https://en.wikipedia.org/wiki/Checksum">checksum</a>. In a nutshell it's used to verify the integrity of slot(if it's corrupted or was tampered with). </p>
+<p><img src="../static/images/spidey/compare_result.png" alt="Compare result" /></p>
+<h1>Finding how the checksum is calculated</h1>
+<p>What should've been a no-brainer became a really boring and tedious task to accomplish just because I didn't stop to think. After locating the <code>Load Save Game</code> routine I should've put a hardware breakpoint on access on the checksum and wait for it to stop on a <code>TEST</code> or a <code>CMP</code>, but nope, this is what I did instead(and what you <strong>should avoid</strong>):</p>
+<ul>
+<li>
+<p>Place a hardware breakpoint on the save slot name. This was a <strong>terrible</strong> idea because the name is not only used to verify the integrity but also is rendered on the screen, this means most of the breakpoints would've been on a <code>MOV</code> leading me to the guess game.</p>
+</li>
+<li>
+<p>Try to find the save slot in memory before it was written to the disk.. Not only it tricked me into thinking I've found checksum routine but made me really mad. (don't even try to do this)</p>
+</li>
+<li>
+<p>Modifying the original <code>SPIDRMAN.DAT</code> when one of the former mentioned breakpoints was hit. This is wrong at so many levels.. As I said I was not thinking straight and didn't take in consideration that the whole save file is read before performing any operations..</p>
+</li>
+</ul>
+<p>Finally I took a break and remembered that in case of checksum failure <code>READ ERROR</code> is displayed on the screen instead of the name. This meant that somewhere in the game it has to decide what it will render on the screen, the error or the name. IDA is able to find the string and I check the xrefs... There's only 1!!! Perfect!</p>
+<p><img src="../static/images/spidey/read_error_xref.png" alt="Read error xref" /></p>
+<p>Here's graphs of the checksum routine:
+<img src="../static/images/spidey/graphs.png" alt="Graphs of checksum" /></p>
+<ul>
+<li><code>EDI</code> holds the the start address of the buffer that contains save slot</li>
+<li><code>EAX</code> is the calculated checksum.(starts as 0)</li>
+<li><code>ECX</code> holds the current position in the save slot buffer(it's treated as a DWORD array)</li>
+<li><code>EDX</code> is the number of elements in the save slot buffer that is also used as the counter in the loop</li>
+</ul>
+<p><code>ECX</code> starts at <code>EDI+4</code> because the first DWORD in the slot is the checksum. While the the end of the slot is not reached it checks whether the 32th bit on the calculated checksum is on, if it is then it doubles the current value and adds 1, if not it only doubles. After that the current DWORD of the save slot buffer is added to the checksum and goes to the next. When the loop is over the first bit is turned on and the checksum is compared to the one in the save slot(which is pointed by <code>EDI</code>), if they match then the name is rendered, else it's <code>READ ERROR</code>. </p>
+<p>All of this culminated with the first version of my save game editor that only contained the <a href="https://github.com/krystalgamer/spidey-tools/blob/master/save_editor/save.c#L35-L50">CalculateChecksum</a> function.</p>
+<p><em>If you're interested in knowing how the game stores the info I'll be covering it in the next post</em></p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2022 krystalgamer
+		</footer>
+	</body>
+
+</html>

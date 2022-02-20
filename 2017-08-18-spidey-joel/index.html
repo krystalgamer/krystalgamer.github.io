@@ -1,0 +1,95 @@
+<html>
+
+	<head>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="https://krystalgamer.github.io/images/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1>Reversing: Spiderman 2000 - Re-enabling Joel Jewett Cheat Code</h1></p>
+<h2>Disabled on the port</h2>
+<p>For some reason the cheat code is disabled on the PC version, if you input it nothing happens. While some speculate that's due to he not being part on the porting process the same applies for the other ports which he's in-game. Thankfully, the devs were lazy and didn't completely remove him from the game(its models and unlocking logic is still there).</p>
+<h2>Finding him in the code</h2>
+<p>He's cheat code is <code>RULUR</code> so the first thing I did was search his cheat code in IDA. Xrefing it only shows one result which is an array of cheat codes with the following structure: <code>CHEAT CODE - CHEAT DESCRIPTION</code>.</p>
+<p><img src="../static/images/spidey/cheat_array.png" alt="Cheat Array" /></p>
+<p>On the left you can see the two xrefs, since the one related to the cheat code is the first I decided to find where it leads me.</p>
+<p>Here's the pseudo-code of the function that references it:</p>
+<div class="highlight"><pre><span></span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_47C440</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a1</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"> </span><span class="c1">// ebx@1</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"> </span><span class="c1">// edi@1</span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">v3</span><span class="p">;</span><span class="w"> </span><span class="c1">// esi@1</span>
+
+<span class="w">  </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">off_5513E0</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">strcmp</span><span class="p">((</span><span class="n">_BYTE</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">a1</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v3</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">v3</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">++</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="n">v3</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="p">(</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="n">aToonSpidey</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="k">goto</span><span class="w"> </span><span class="n">LABEL_6</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="nl">LABEL_6</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">sub_47C240</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<h2>What's going on?</h2>
+<p>The while loop walks through the cheat code list and each one is compared to the one sent to the function. If it's not equal it keeps going until the end of the array is reached and then calls <code>sub_47C240</code> with the argument -1. If the strings are equal(you entered a valid cheat code) it stops and <code>sub_47C240</code> is called with the index of the cheat code, unless the index is 4 in that case the function returns <strong>immediately</strong> -1.</p>
+<h3>What the hell is on index 4??</h3>
+<p>The <code>RULUR</code> cheat code. Now it's time to patch the binary and remove that check!</p>
+<p><img src="../static/images/spidey/jump_patch.png" alt="Jump replace" /></p>
+<p>The possibilities to fix this are endless but what I decided to do was simply <code>NOP</code> the jump.</p>
+<p>Lastly, <code>sub_47C240</code> is the actual function where the cheat is activated if the argument is -1 it simply returns 0, else it modifies some global flags.</p>
+<h3>Here's a video I made showcasing the cheat code working</h3>
+<p><div class="youtube-container"><iframe src="https://www.youtube.com/embed/H-bs5sTNDmc"" frameborder="0" allowfullscreen class="youtube-video"></iframe></div>
+<em>This post wasn't meant to come this earlier but the one one I was writing is taking more time</em></p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2022 krystalgamer
+		</footer>
+	</body>
+
+</html>

