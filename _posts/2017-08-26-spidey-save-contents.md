@@ -71,5 +71,5 @@ Make sure to check the source code of the save editor: [HERE](https://github.com
 
 And here's a video of it in action:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ScPe5oTNv8E" frameborder="0" allowfullscreen></iframe>
+{.video https://www.youtube.com/embed/ScPe5oTNv8E"}
 

@@ -8,6 +8,7 @@ tags: [spiderman, cracking, protection, spiderman 2000, reverse engineering, ida
 comments: false
 ---
 
+
 # Background
 
 
@@ -205,8 +206,9 @@ The address `spideypc.5159C8` contains a call to `MessageBoxA` followed by a `_e
 If you're interested in seeing how this process unfolded then you can watch the two VODs.
 
 Here I stumbled upon the problem but don't go super deep:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ZN365iN7myM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+{.video https://www.youtube.com/embed/ZN365iN7myM}
 
 Stream dedicated to developing the exploit:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/a6A6XOOhJ2g" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+{.video https://www.youtube.com/embed/a6A6XOOhJ2g}

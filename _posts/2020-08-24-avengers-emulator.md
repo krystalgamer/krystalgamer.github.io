@@ -761,5 +761,5 @@ You can find the source code and binaries at: [MarvelAvengers](https://github.co
 
 
 Video showcasing the emulator:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/MLn475soq1M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+{.video https://www.youtube.com/embed/MLn475soq1M"}
 

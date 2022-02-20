@@ -70,5 +70,5 @@ Lastly, `sub_47C240` is the actual function where the cheat is activated if the 
 ### Here's a video I made showcasing the cheat code working
 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/H-bs5sTNDmc" frameborder="0" allowfullscreen></iframe>
+{.video https://www.youtube.com/embed/H-bs5sTNDmc"}
 *This post wasn't meant to come this earlier but the one one I was writing is taking more time*
