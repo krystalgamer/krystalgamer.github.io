@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kanye West's Stem Player - An engineering disaster"
-description: "This post cover the history of the Stem Player, the development of the emulator, how badly the product was handled and some behind-the-scenes interactions with the creators"
+description: "This post covers the history of the Stem Player, the development of the emulator, how badly the product was handled and some behind-the-scenes interactions with the creators"
 created: 2022-08-05
 modified: 2022-08-05
 tags: [later]
