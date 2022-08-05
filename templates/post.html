@@ -1,8 +1,13 @@
 {% extends "skeleton.html" %}
 
+{% block title%} {{post_title}} {% endblock %}
+
+{% block og_description %}{{ post_description }}{% endblock %}
+
 {% block extra_sheets %}
 	<link rel="stylesheet" href="{{ url_for('static', filename='borland.css')}}">
 {% endblock %}
+
 {% block content %}
 	<div class="post-holder">
 		{{ post|safe }}
