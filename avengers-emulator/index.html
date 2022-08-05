@@ -1,6 +1,7 @@
 <html>
 
 	<head>
+		<title> Reverse Engineering: Marvel&#39;s Avengers - Developing a Server Emulator </title>
 		
 	<link rel="stylesheet" href="../static/borland.css">
 
@@ -9,6 +10,13 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
 
+		
+			<meta property="og:title" content=" Reverse Engineering: Marvel&#39;s Avengers - Developing a Server Emulator " />
+			<meta property="og:description" content="Documentation of reversal and building of a Marvel&#39;s Avenger server emulator" />
+			<meta property="og:type" content="summary" />
+			<meta name="og:image" content="https://krystalgamer.github.io/static/banner.jpg" />
+
+		
 	</head>
 
 
@@ -38,7 +46,7 @@
 
 			
 	<div class="post-holder">
-		<p><h1>Reverse Engineering: Marvel's Avengers - Developing a Server Emulator</h1></p>
+		<p><h1 id="post-title">Reverse Engineering: Marvel's Avengers - Developing a Server Emulator</h1></p>
 <h1>Context</h1>
 <p>During these past two weeks I had the chance to play the Marvel's Avengers Beta. The game allows the player to player solo or hop into matchmaking to find some squad-mates.
 Even playing solo it was clear that the game needed internet connectivity. Having already played last week during the closed-beta I decided to use the new open-beta to explore more about the game's networking.</p>
@@ -467,7 +475,7 @@ X-Iinfo: [REDACTED]
 <h3>Beta over and emulator stops working</h3>
 <p>As soon as the beta was over it was time to really test my emulator aaaaaaaaaaaaaaand it got stuck at logging in. The problem was not apparent at all, since lots of requests were creating errors but the game was still playable. Looking at the logs something caught my attention, the <code>login</code> endpoint was throwing a <code>405 Method Not Allowed</code>, now this is interesting. I had it setup to accept both <code>GET</code> and <code>POST</code> so what the hell was it trying to do?
 Checking the HTTP headers it became clear what was happening, the client was prefixing the HTTP method with a JSON token.</p>
-<div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;userSandbox&quot;</span><span class="p">:</span><span class="s2">&quot;steam&quot;</span><span class="p">,</span><span class="nt">&quot;user&quot;</span><span class="p">:{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">,</span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="s2">&quot;steam_id&quot;</span><span class="p">},</span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="s2">&quot;windows&quot;</span><span class="p">,</span><span class="nt">&quot;identity&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;steam_token&quot;</span><span class="p">,</span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">}}</span><span class="err">POST</span><span class="w"> </span><span class="err">/api//logi</span><span class="kc">n</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;userSandbox&quot;</span><span class="p">:</span><span class="s2">&quot;steam&quot;</span><span class="p">,</span><span class="nt">&quot;user&quot;</span><span class="p">:{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">,</span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="s2">&quot;steam_id&quot;</span><span class="p">},</span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="s2">&quot;windows&quot;</span><span class="p">,</span><span class="nt">&quot;identity&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;steam_token&quot;</span><span class="p">,</span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">}}</span><span class="err">POST</span><span class="w"> </span><span class="err">/api</span><span class="c1">//login</span><span class="w"></span>
 </pre></div>
 <p>Square has their reasons for doing this, it probably gets filtered on the listener webserver before even hitting the node responsible before dealing with the request.</p>
 <p>The solution was not the best but it did the trick:</p>
@@ -485,11 +493,11 @@ Checking the HTTP headers it became clear what was happening, the client was pre
 <div class="highlight"><pre><span></span>eyJhbGciOiJIUzI1NiJ9.eyJsb2MiOiJCRS1XQUwiLCJzdWIiOiI2OSIsImF0eSI6InByb2QiLCJjbXUiOiJzdGVhbSIsInVieCI6InN0ZWFtIiwic3lzIjoid2luZG93cyIsInJvbCI6WyJwbGF5QGNyeS10cm12Ni1iZXRhLXByb2Q6cmV0YWlsIl0sImlkcCI6InN0ZWFtX2lkIiwic2VnIjoiTmozdHROSExCZl9IZ1A3R1U5VTBZS0tZeUN0cXAyTDAiLCJjYngiOiJkZWZhdWx0Iiwic2VtIjoiMjIzMDI3MDMiLCJ0YWciOiJ0aGljYyBib2kiLCJza3UiOiIxMzU4ODIwIiwiZXhwIjoxNTk4MjQwNDI2LCJpYXQiOjE1OTgxOTcyMjZ9.eyJiYW5hbmEiOjF9
 </pre></div>
 <p>It looked like base64 so I decoded it and quickly learned it was a JWT(JSON Web Token). They're composed of three parts, seperated by a period - Header(defines signature algorithm), Payload(data) and Signature. The first two parts are base64 encoded and are JSONS such as these ones:</p>
-<div class="highlight"><pre><span></span><span class="err">//Header</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="c1">//Header</span><span class="w"></span>
 <span class="p">{</span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="s2">&quot;HS256&quot;</span><span class="p">}</span><span class="w"></span>
 
 
-<span class="err">//Payload</span><span class="w"></span>
+<span class="c1">//Payload</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;loc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BE-WAL&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;69&quot;</span><span class="p">,</span><span class="w"></span>

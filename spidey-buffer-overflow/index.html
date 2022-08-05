@@ -1,6 +1,7 @@
 <html>
 
 	<head>
+		<title> Exploiting: Spiderman 2000 - Buffer overflow in file loading routine </title>
 		
 	<link rel="stylesheet" href="../static/borland.css">
 
@@ -9,6 +10,13 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
 
+		
+			<meta property="og:title" content=" Exploiting: Spiderman 2000 - Buffer overflow in file loading routine " />
+			<meta property="og:description" content="After reversing some routines of the game I stumbled upon a possible buffer overflow vulnerability that turned out to be exploitable" />
+			<meta property="og:type" content="summary" />
+			<meta name="og:image" content="https://krystalgamer.github.io/static/banner.jpg" />
+
+		
 	</head>
 
 
@@ -38,7 +46,7 @@
 
 			
 	<div class="post-holder">
-		<p><h1>Exploiting: Spiderman 2000 - Buffer overflow in file loading routine</h1></p>
+		<p><h1 id="post-title">Exploiting: Spiderman 2000 - Buffer overflow in file loading routine</h1></p>
 <h1>Background</h1>
 <p>At the end of this year(2019) I decided to completly reverse engineer the game Spider-Man 2000 for the PC in order to be able to fix all of its problems and possibly port it to more architectures and OS(es).
 During my second stream I was working on the routine that loads the file <code>texture.dat</code> and noticed that the buffer not only in allocated in the stack but there's no boundary check.</p>
