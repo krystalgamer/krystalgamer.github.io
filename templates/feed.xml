@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>{{ url_for('serve_feed', _external=True) }}</id>
+    <title>krystalgamer's Blog</title>
+    <link rel="alternate" href="{{ url_for('serve_main', _external=True) }}" />
+    <link rel="self" href="{{ url_for('serve_feed', _external=True) }}" />
+    <updated>{{ now.isoformat('T', 'seconds') }}Z</updated>
+    <author><name>krystalgamer</name></author>
+
+    {% for entry in entries %}
+    <entry>
+        <id>{{ url_for('serve_post', post_id=entry.id, _external=True) }}</id>
+        <title>{{ entry.title }}</title>
+        <published>{{ entry.timestamp.isoformat('T', 'seconds') }}Z</published>
+        <updated>{{ entry.modified_timestamp.isoformat('T', 'seconds') }}Z</updated>
+        <link rel="alternate" href="{{ url_for('serve_post', post_id=entry.id, _external=True) }}" />
+    </entry>
+    {% endfor %}
+</feed>

@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: python3 -m pip install krystal
     - name: Build
-      run: krystal --build
+      run: krystal --build --base-url "https://krystalgamer.github.io/"
     - name: Put in gh-pages
       run: |
         touch build/.nojekyll
