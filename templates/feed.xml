@@ -11,6 +11,7 @@
     <entry>
         <id>{{ url_for('serve_post', post_id=entry.id, _external=True) }}</id>
         <title>{{ entry.title }}</title>
+	<summary>{{ entry.description }}</summary>
         <published>{{ entry.timestamp.isoformat('T', 'seconds') }}Z</published>
         <updated>{{ entry.modified_timestamp.isoformat('T', 'seconds') }}Z</updated>
         <link rel="alternate" href="{{ url_for('serve_post', post_id=entry.id, _external=True) }}" />
