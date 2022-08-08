@@ -460,6 +460,16 @@ Out of all the posts, the one that really got under my nerves was the following 
 
 It contains a quote from Alex where he mentions ye said he liked his work and a video with a historical overview of music distribution. The first step is the "LP ALBUM" where the process is linear, curated and physical, so no EPs or singles, I guess. Also, what's the problem with curation? If a label is putting money on an artist, of course, they'd like to make sure it's not going to waste. The next phase is "MP3 and STREAMING", marked as 2003, everyone remembers streaming music in the early 2000s, right? It is described as shuffle, incomplete and digital. First of all, what the hell do they mean with shuffle? Digital music formats made it easier to rearrange listening orders, but is that really important? INCOMPLETE!? The early 2000s was the time of peer-to-peer file sharing, torrents, Limewire, Napster,... It was the best time to access entire artists' discography if something, it was far more complete. Before, if the record store didn't have the record, tough luck. Now it was just a few clicks away. The last stage is the "STEM PLAYER" where music distribution is interactive, creative and decentralized. I'd like to find a more interactive system than the play button. TikTok is a far more creative music distribution system than the stem player. The part that annoyed me was the "decentralized" while the animation shows lines connecting different Stem Players. Are they implying Stem Players can send songs between each other? Because they can't, it's one of the most centralized services ever. High entry fee, proprietary gadget and proprietary Web Portal, nothing about it decentralized.
 
+
+## They were aware of their lack of security
+
+When I found out their API only did a length check on the serial number, I messaged one of the employees.
+
+![Employee's response](images/stemplayer/sn_check.png)
+
+As you can see, I told them on the 19th - 3 days before the album's release on the platform - to which they told me it "actually [is] intentional for now". It still baffles me to this day how a platform was so aware and underprepared for such high profile release. Later, I found out why they weren't doing the check (spoiler: they didn't know which Stem Players were actually shipped).
+
+
 ## Donda 2 stems were terribly split
 
 After release, users quickly noticed that most tracks were not correctly split and had weird production artifacts that should never reach the public, e.g On Louie Bags the drums were clipping. Someone on Twitter tagged Mike Dean, a long-time ye collaborator and music legend, and I hoped on the thread to show him how bad it was, to which he replied:
@@ -597,12 +607,12 @@ The last two job openings gave the impression to the users that they are working
 
 ![Workable page](images/stemplayer/workable.png)
 
-Their description is top-notch. The first bullet point contains the following quote - `biggest thing to happen to music since the iPod` - wow! It came from a [medium article](https://medium.com/@liammaccormack/the-stem-player-is-the-biggest-thing-to-happen-to-music-since-the-ipod-and-heres-why-19d71ddff29e) from a guy with 4 followers and 3 total articles. Great start! The second bullet point mentions how their technology is made for creation and not consumption... the only way to consume Donda 2 is by owning your device. The third point mentions how they formed in 2014 and since then have sold more than a million units worldwide, starting first with computer coding kits(more on this later). The fourth point talks about how they won multiple awards while omitting the year and product.. "TIME Maganize's Invention of the Year" is awarded yearly to 100 products, and their DYI PCs was one of the listed products in 2019; For "Fast Company's Top 50 Most Innovative Companies", Kano also made the list for DYI PC in 2019; The "Golden Lion at Canne" I couldn't find any information, but if they actually did win something it was for their DYI PCs. The fifth point is composed of quotes about DYI tech and the sixth is about when they started to work with ye. Overall, a lot of showing off of a product they don't produce anymore.
+Their description is top-notch. The first bullet point contains the following quote - `biggest thing to happen to music since the iPod` - wow! It came from a [medium article](https://medium.com/@liammaccormack/the-stem-player-is-the-biggest-thing-to-happen-to-music-since-the-ipod-and-heres-why-19d71ddff29e) from a guy with 4 followers and 3 total articles. Great start! The second bullet point mentions how their technology is made for creation and not consumption... the only way to consume Donda 2 is by owning your device. The third point mentions how they formed in 2014 and since then have sold more than a million units worldwide, starting first with computer coding kits(more on this later). The fourth point talks about how they won multiple awards while omitting the year and product.. "TIME Maganize's Invention of the Year" is awarded yearly to 100 products, and their DIY PCs was one of the listed products in 2019; For "Fast Company's Top 50 Most Innovative Companies", Kano also made the list for DIY PC in 2019; The "Golden Lion at Canne" I couldn't find any information, but if they actually did win something it was for their DIY PCs. The fifth point is composed of quotes about DIY tech and the sixth is about when they started to work with ye. Overall, a lot of showing off of a product they don't produce anymore.
 
 
 ## Kano isn't Kano
 
-From the latest section, you were probably confused about DYI tech. Kano started as a company that built computer kits for children to learn to code. They mainly were custom casings that were disassemblable and some peripherals such as mice, keyboards and headphones. You can easily find articles and videos on YouTube where Alex Klein is showing off the product to news outlets. You can also find famous people such as [Mark Zuckerberg](https://twitter.com/alexnklein/status/1400739467921694720) and Djokovic talking positively about the product. So.... what happened to the custom DYI PC kits? If you access their website, it's out of stock, and a few people are asking for a restock. You can find very few kits on eBay, which makes me believe they probably never sold any and just distributed when visiting schools. *Speculation*: After linking up with ye in 2019, they completely halted their ventures in educational technology and focused on the Stem Player.
+From the latest section, you were probably confused about DIY tech. Kano started as a company that built computer kits for children to learn to code. They mainly were custom casings that were disassemblable and some peripherals such as mice, keyboards and headphones. You can easily find articles and videos on YouTube where Alex Klein is showing off the product to news outlets. You can also find famous people such as [Mark Zuckerberg](https://twitter.com/alexnklein/status/1400739467921694720) and Djokovic talking positively about the product. So.... what happened to the custom DIY PC kits? If you access their website, it's out of stock, and a few people are asking for a restock. You can find very few kits on eBay, which makes me believe they probably never sold any and just distributed when visiting schools. *Speculation*: After linking up with ye in 2019, they completely halted their ventures in educational technology and focused on the Stem Player.
 
 
 If you visit their GitHub page, you can see a lot of old repositories. If you check the contributors to those repos, you'll quickly realize most people are not working at Kano anymore. Nothing against someone who saw an opportunity, but it sets a record of a company that gets a lot of hype in a short span of time and then massively underdelivers and ignores the past. Also, according to [this](https://www.cnbc.com/2020/07/14/kano-microsoft-backs-start-up-looking-to-challenge-google-in-edtech.html) news article Kano was founded in 2013, which is backed up by their [Wikipedia page](https://en.wikipedia.org/wiki/Kano_Computing) where it listed when they launched their products.
@@ -611,9 +621,9 @@ If you visit their GitHub page, you can see a lot of old repositories. If you ch
 One quick look on Twitter, one can find other products that never materialized such as:
 
 - [VR kit](https://twitter.com/teamkano/status/715970504264384512) - link to their website is dead and from what I could find, none were produced
-- [Code with dazzling lights](https://twitter.com/alexnklein/status/1367256062391246854) - posted 5 months before the release of the Stem Player to the public, as other DYI kits none seems to ever been produced or sold
+- [Code with dazzling lights](https://twitter.com/alexnklein/status/1367256062391246854) - posted 5 months before the release of the Stem Player to the public, as other DIY kits none seems to ever been produced or sold
 
-Are they still on the DYI and teach children to code market? Who knows? I don't think they know.
+Are they still on the DIY and teach children to code market? Who knows? I don't think they know.
 
 
 
@@ -694,6 +704,10 @@ There's a lot to unpack here. Most browsers don't support WebUSB/WebBluetooth du
 
 "hinders people trying to create open and free technology" shows their lack of self-awareness. The Stem Player is not open - no SDK, proprietary firmware and no schematics - and is not free, there's a 200$ price tag, for god's sake.
 
+
+<br/>
+
+*EDIT: Regarding the following paragraph, some users have suggested that "node based" might've been referencing to the interface and not the JavaScript runtime.*
 
 Checking their profile, there's also this [banger](https://twitter.com/neuemodern/status/1124037737991028736):
 
