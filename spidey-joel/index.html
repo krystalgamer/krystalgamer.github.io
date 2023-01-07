@@ -54,30 +54,30 @@
 <p><img src="../static/images/spidey/cheat_array.png" alt="Cheat Array" /></p>
 <p>On the left you can see the two xrefs, since the one related to the cheat code is the first I decided to find where it leads me.</p>
 <p>Here's the pseudo-code of the function that references it:</p>
-<div class="highlight"><pre><span></span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_47C440</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a1</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_47C440</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a1</span><span class="p">)</span>
+<span class="p">{</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"> </span><span class="c1">// ebx@1</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"> </span><span class="c1">// edi@1</span>
 <span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">v3</span><span class="p">;</span><span class="w"> </span><span class="c1">// esi@1</span>
 
-<span class="w">  </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">off_5513E0</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">strcmp</span><span class="p">((</span><span class="n">_BYTE</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">a1</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v3</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">v3</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="o">++</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="n">v3</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="p">(</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="n">aToonSpidey</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="k">goto</span><span class="w"> </span><span class="n">LABEL_6</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
-<span class="nl">LABEL_6</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">sub_47C240</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">off_5513E0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">strcmp</span><span class="p">((</span><span class="n">_BYTE</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">a1</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v3</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">v3</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="o">++</span><span class="n">v2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="n">v3</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="p">(</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="n">aToonSpidey</span><span class="w"> </span><span class="p">)</span>
+<span class="w">      </span><span class="k">goto</span><span class="w"> </span><span class="n">LABEL_6</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="nl">LABEL_6</span><span class="p">:</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">sub_47C240</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 <h2>What's going on?</h2>
 <p>The while loop walks through the cheat code list and each one is compared to the one sent to the function. If it's not equal it keeps going until the end of the array is reached and then calls <code>sub_47C240</code> with the argument -1. If the strings are equal(you entered a valid cheat code) it stops and <code>sub_47C240</code> is called with the index of the cheat code, unless the index is 4 in that case the function returns <strong>immediately</strong> -1.</p>
@@ -96,7 +96,7 @@
 		</main>
 
 		<footer class="container">
-			© 2022 krystalgamer
+			© 2023 krystalgamer
 		</footer>
 	</body>
 

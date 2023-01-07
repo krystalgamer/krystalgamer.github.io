@@ -69,90 +69,90 @@ The process goes like this:</p>
 <p>This part got me scared since the game uses Denuvo which contributes to its 400MB of executable size. I wanted to avoid messing its anti-tamper measures.
 To verify where the traffic comes from within the game using <code>x64dbg</code> I placed a breakpoint at <code>getaddrinfo</code> in <code>ws2_32.dll</code>. When the breakpoint was hit reading the callstack showed where it came from, it was <code>osdk.dll</code>. This module was shipped with the game and until that moment I was not aware of its existence.</p>
 <p>The next step was to see what it exports:</p>
-<div class="highlight"><pre><span></span>$ dumpbin -exports osdk.dll
+<div class="highlight"><pre><span></span>$<span class="w"> </span>dumpbin<span class="w"> </span>-exports<span class="w"> </span>osdk.dll
 
 
-    ordinal hint RVA      name
+<span class="w">    </span>ordinal<span class="w"> </span>hint<span class="w"> </span>RVA<span class="w">      </span>name
 
-         <span class="m">25</span>   <span class="m">18</span> 000DB510 osdk_HTTPClient_SetDefaultLoggingFlags
-         <span class="m">26</span>   <span class="m">19</span> 000DB520 osdk_HTTPClient_addBackFilter
-         <span class="m">29</span>   1C 000DB5F0 osdk_HTTPClient_enableBodyCompression
-         <span class="m">30</span>   1D 000DB600 osdk_HTTPClient_enableWebLogging
-         <span class="m">33</span>   <span class="m">20</span> 000DB7A0 osdk_HTTPClient_setLoggingFlags
-         <span class="m">34</span>   <span class="m">21</span> 000DBBF0 osdk_HTTPFilter_Create
-         <span class="m">35</span>   <span class="m">22</span> 000DBF60 osdk_HTTPHeaderNames_Get
-         <span class="m">36</span>   <span class="m">23</span> 000DBF70 osdk_HTTPHeaders_getKeyAt
-         <span class="m">48</span>   2F 000DC8A0 osdk_HTTPRequestBuilder_setConnectTimeout
-         <span class="m">49</span>   <span class="m">30</span> 000DC8B0 osdk_HTTPRequestBuilder_setHeader
-         <span class="m">50</span>   <span class="m">31</span> 000DC8C0 osdk_HTTPRequestBuilder_setParameter
-         <span class="m">51</span>   <span class="m">32</span> 000DC8D0 osdk_HTTPRequestBuilder_setSerializationMilliseconds
-         <span class="m">52</span>   <span class="m">33</span> 000A9B00 osdk_HTTPRequestBuilder_structSize
-         <span class="m">53</span>   <span class="m">34</span> 000DC0B0 osdk_HTTPRequest_setHeader
-         <span class="m">54</span>   <span class="m">35</span> 000DCA70 osdk_HTTPResponse_Create
-         <span class="m">63</span>   3E 000DCE10 osdk_HTTPResponse_getReceivedAt
-         <span class="m">64</span>   3F 000DCE40 osdk_HTTPResponse_getStatusCode
-         <span class="m">65</span>   <span class="m">40</span> 000DCE50 osdk_HTTPResponse_setStatus
-         <span class="m">66</span>   <span class="m">41</span> 000DCEE0 osdk_HTTPUserAgentBuilder_build
-         <span class="m">67</span>   <span class="m">42</span> 000DCF50 osdk_HTTPUserAgentBuilder_construct
-         <span class="m">68</span>   <span class="m">43</span> 000DCF60 osdk_HTTPUserAgentBuilder_destruct
-         <span class="m">69</span>   <span class="m">44</span> 000DCF70 osdk_HTTPUserAgentBuilder_setApplicationDetail
-         <span class="m">75</span>   4A 000DD000 osdk_HTTPUserAgentBuilder_setFrameworkVersion
-         <span class="m">76</span>   4B 000B5E20 osdk_IdentityProviders_Get
-         <span class="m">83</span>   <span class="m">52</span> 000DD280 osdk_Identity_assignMove
-         <span class="m">84</span>   <span class="m">53</span> 000DD290 osdk_Identity_construct
-         <span class="m">85</span>   <span class="m">54</span> 000DD2B0 osdk_Identity_constructMove
-        <span class="m">107</span>   6A 000DD7A0 osdk_JSONArray_begin
-        <span class="m">108</span>   6B 000DD7C0 osdk_JSONArray_end
-        <span class="m">109</span>   6C 000DD7F0 osdk_JSONArray_get
-        <span class="m">110</span>   6D 000DD820 osdk_JSONArray_isEmpty
-        <span class="m">111</span>   6E 000DD840 osdk_JSONArray_pushBack
-        <span class="m">112</span>   6F 000DD860 osdk_JSONArray_pushBackBool
-        <span class="m">147</span>   <span class="m">92</span> 000E5A20 osdk_JSONValue_asFloat
-        <span class="m">148</span>   <span class="m">93</span> 000E5A30 osdk_JSONValue_asInt16
-        <span class="m">149</span>   <span class="m">94</span> 000E5A30 osdk_JSONValue_asInt32
-        <span class="m">150</span>   <span class="m">95</span> 000E5A40 osdk_JSONValue_asInt64
-        <span class="m">208</span>   CF 000C0F90 osdk_ManualSignal_cleanup
-        <span class="m">209</span>   D0 000C0FC0 osdk_ManualSignal_initialize
-        <span class="m">217</span>   D8 000E6220 osdk_MediaTypeNames_Get
-        <span class="m">230</span>   E5 000C0A60 osdk_ObjectId_Parse
-        <span class="m">231</span>   E6 000C0A70 osdk_ObjectId_structSize
-        <span class="m">232</span>   E7 000C0A80 osdk_ObjectId_toString
-        <span class="m">233</span>   E8 000A9B00 osdk_OsdkInfo_structSize
-        <span class="m">234</span>   E9 000C0AF0 osdk_ProfileId_structSize
-        <span class="m">305</span>  <span class="m">130</span> 000BFF50 osdk_UInt32ToAscii
-        <span class="m">306</span>  <span class="m">131</span> 000BFF70 osdk_UInt32ToAsciiLength
-        <span class="m">307</span>  <span class="m">132</span> 000BFFB0 osdk_UInt64ToAscii
-        <span class="m">308</span>  <span class="m">133</span> 000BFFD0 osdk_UInt64ToAsciiLength
-        <span class="m">313</span>  <span class="m">138</span> 000C2B40 osdk_UserAccountType_Get
-        <span class="m">314</span>  <span class="m">139</span> 000A57C0 osdk_UserId_structSize
-        <span class="m">315</span>  13A 000A5840 osdk_UserInfo_constructCopy
-        <span class="m">316</span>  13B 000A5850 osdk_UserInfo_move
-        <span class="m">317</span>  13C 000A58B0 osdk_UserInfo_structSize
-        <span class="m">329</span>  <span class="m">148</span> 000C2E00 osdk_Variant_ConstructUInt16
-        <span class="m">336</span>  14F 000C3210 osdk_VersionValues_Get
-        <span class="m">337</span>  <span class="m">150</span> 000C3220 osdk_Version_Parse
-        <span class="m">338</span>  <span class="m">151</span> 000C32E0 osdk_Version_fromParts
-        <span class="m">339</span>  <span class="m">152</span> 000C3320 osdk_Version_toString
-        <span class="m">340</span>  <span class="m">153</span> 000A71A0 osdk_WebServiceClientAttributeKeys_Get
-        <span class="m">341</span>  <span class="m">154</span> 000A97A0 osdk_WebServiceClientBuilder_Create
-        <span class="m">342</span>  <span class="m">155</span> 000A97C0 osdk_WebServiceClientBuilder_build
-        <span class="m">360</span>  <span class="m">167</span> 000A6A10 osdk_WebServiceClient_addStatisticsDeserializationMilliseconds
-        <span class="m">387</span>  <span class="m">182</span> 000A3C90 osdk_addProcessCallback
-        <span class="m">388</span>  <span class="m">183</span> 000A3CA0 osdk_beginNewGameSession
+<span class="w">         </span><span class="m">25</span><span class="w">   </span><span class="m">18</span><span class="w"> </span>000DB510<span class="w"> </span>osdk_HTTPClient_SetDefaultLoggingFlags
+<span class="w">         </span><span class="m">26</span><span class="w">   </span><span class="m">19</span><span class="w"> </span>000DB520<span class="w"> </span>osdk_HTTPClient_addBackFilter
+<span class="w">         </span><span class="m">29</span><span class="w">   </span>1C<span class="w"> </span>000DB5F0<span class="w"> </span>osdk_HTTPClient_enableBodyCompression
+<span class="w">         </span><span class="m">30</span><span class="w">   </span>1D<span class="w"> </span>000DB600<span class="w"> </span>osdk_HTTPClient_enableWebLogging
+<span class="w">         </span><span class="m">33</span><span class="w">   </span><span class="m">20</span><span class="w"> </span>000DB7A0<span class="w"> </span>osdk_HTTPClient_setLoggingFlags
+<span class="w">         </span><span class="m">34</span><span class="w">   </span><span class="m">21</span><span class="w"> </span>000DBBF0<span class="w"> </span>osdk_HTTPFilter_Create
+<span class="w">         </span><span class="m">35</span><span class="w">   </span><span class="m">22</span><span class="w"> </span>000DBF60<span class="w"> </span>osdk_HTTPHeaderNames_Get
+<span class="w">         </span><span class="m">36</span><span class="w">   </span><span class="m">23</span><span class="w"> </span>000DBF70<span class="w"> </span>osdk_HTTPHeaders_getKeyAt
+<span class="w">         </span><span class="m">48</span><span class="w">   </span>2F<span class="w"> </span>000DC8A0<span class="w"> </span>osdk_HTTPRequestBuilder_setConnectTimeout
+<span class="w">         </span><span class="m">49</span><span class="w">   </span><span class="m">30</span><span class="w"> </span>000DC8B0<span class="w"> </span>osdk_HTTPRequestBuilder_setHeader
+<span class="w">         </span><span class="m">50</span><span class="w">   </span><span class="m">31</span><span class="w"> </span>000DC8C0<span class="w"> </span>osdk_HTTPRequestBuilder_setParameter
+<span class="w">         </span><span class="m">51</span><span class="w">   </span><span class="m">32</span><span class="w"> </span>000DC8D0<span class="w"> </span>osdk_HTTPRequestBuilder_setSerializationMilliseconds
+<span class="w">         </span><span class="m">52</span><span class="w">   </span><span class="m">33</span><span class="w"> </span>000A9B00<span class="w"> </span>osdk_HTTPRequestBuilder_structSize
+<span class="w">         </span><span class="m">53</span><span class="w">   </span><span class="m">34</span><span class="w"> </span>000DC0B0<span class="w"> </span>osdk_HTTPRequest_setHeader
+<span class="w">         </span><span class="m">54</span><span class="w">   </span><span class="m">35</span><span class="w"> </span>000DCA70<span class="w"> </span>osdk_HTTPResponse_Create
+<span class="w">         </span><span class="m">63</span><span class="w">   </span>3E<span class="w"> </span>000DCE10<span class="w"> </span>osdk_HTTPResponse_getReceivedAt
+<span class="w">         </span><span class="m">64</span><span class="w">   </span>3F<span class="w"> </span>000DCE40<span class="w"> </span>osdk_HTTPResponse_getStatusCode
+<span class="w">         </span><span class="m">65</span><span class="w">   </span><span class="m">40</span><span class="w"> </span>000DCE50<span class="w"> </span>osdk_HTTPResponse_setStatus
+<span class="w">         </span><span class="m">66</span><span class="w">   </span><span class="m">41</span><span class="w"> </span>000DCEE0<span class="w"> </span>osdk_HTTPUserAgentBuilder_build
+<span class="w">         </span><span class="m">67</span><span class="w">   </span><span class="m">42</span><span class="w"> </span>000DCF50<span class="w"> </span>osdk_HTTPUserAgentBuilder_construct
+<span class="w">         </span><span class="m">68</span><span class="w">   </span><span class="m">43</span><span class="w"> </span>000DCF60<span class="w"> </span>osdk_HTTPUserAgentBuilder_destruct
+<span class="w">         </span><span class="m">69</span><span class="w">   </span><span class="m">44</span><span class="w"> </span>000DCF70<span class="w"> </span>osdk_HTTPUserAgentBuilder_setApplicationDetail
+<span class="w">         </span><span class="m">75</span><span class="w">   </span>4A<span class="w"> </span>000DD000<span class="w"> </span>osdk_HTTPUserAgentBuilder_setFrameworkVersion
+<span class="w">         </span><span class="m">76</span><span class="w">   </span>4B<span class="w"> </span>000B5E20<span class="w"> </span>osdk_IdentityProviders_Get
+<span class="w">         </span><span class="m">83</span><span class="w">   </span><span class="m">52</span><span class="w"> </span>000DD280<span class="w"> </span>osdk_Identity_assignMove
+<span class="w">         </span><span class="m">84</span><span class="w">   </span><span class="m">53</span><span class="w"> </span>000DD290<span class="w"> </span>osdk_Identity_construct
+<span class="w">         </span><span class="m">85</span><span class="w">   </span><span class="m">54</span><span class="w"> </span>000DD2B0<span class="w"> </span>osdk_Identity_constructMove
+<span class="w">        </span><span class="m">107</span><span class="w">   </span>6A<span class="w"> </span>000DD7A0<span class="w"> </span>osdk_JSONArray_begin
+<span class="w">        </span><span class="m">108</span><span class="w">   </span>6B<span class="w"> </span>000DD7C0<span class="w"> </span>osdk_JSONArray_end
+<span class="w">        </span><span class="m">109</span><span class="w">   </span>6C<span class="w"> </span>000DD7F0<span class="w"> </span>osdk_JSONArray_get
+<span class="w">        </span><span class="m">110</span><span class="w">   </span>6D<span class="w"> </span>000DD820<span class="w"> </span>osdk_JSONArray_isEmpty
+<span class="w">        </span><span class="m">111</span><span class="w">   </span>6E<span class="w"> </span>000DD840<span class="w"> </span>osdk_JSONArray_pushBack
+<span class="w">        </span><span class="m">112</span><span class="w">   </span>6F<span class="w"> </span>000DD860<span class="w"> </span>osdk_JSONArray_pushBackBool
+<span class="w">        </span><span class="m">147</span><span class="w">   </span><span class="m">92</span><span class="w"> </span>000E5A20<span class="w"> </span>osdk_JSONValue_asFloat
+<span class="w">        </span><span class="m">148</span><span class="w">   </span><span class="m">93</span><span class="w"> </span>000E5A30<span class="w"> </span>osdk_JSONValue_asInt16
+<span class="w">        </span><span class="m">149</span><span class="w">   </span><span class="m">94</span><span class="w"> </span>000E5A30<span class="w"> </span>osdk_JSONValue_asInt32
+<span class="w">        </span><span class="m">150</span><span class="w">   </span><span class="m">95</span><span class="w"> </span>000E5A40<span class="w"> </span>osdk_JSONValue_asInt64
+<span class="w">        </span><span class="m">208</span><span class="w">   </span>CF<span class="w"> </span>000C0F90<span class="w"> </span>osdk_ManualSignal_cleanup
+<span class="w">        </span><span class="m">209</span><span class="w">   </span>D0<span class="w"> </span>000C0FC0<span class="w"> </span>osdk_ManualSignal_initialize
+<span class="w">        </span><span class="m">217</span><span class="w">   </span>D8<span class="w"> </span>000E6220<span class="w"> </span>osdk_MediaTypeNames_Get
+<span class="w">        </span><span class="m">230</span><span class="w">   </span>E5<span class="w"> </span>000C0A60<span class="w"> </span>osdk_ObjectId_Parse
+<span class="w">        </span><span class="m">231</span><span class="w">   </span>E6<span class="w"> </span>000C0A70<span class="w"> </span>osdk_ObjectId_structSize
+<span class="w">        </span><span class="m">232</span><span class="w">   </span>E7<span class="w"> </span>000C0A80<span class="w"> </span>osdk_ObjectId_toString
+<span class="w">        </span><span class="m">233</span><span class="w">   </span>E8<span class="w"> </span>000A9B00<span class="w"> </span>osdk_OsdkInfo_structSize
+<span class="w">        </span><span class="m">234</span><span class="w">   </span>E9<span class="w"> </span>000C0AF0<span class="w"> </span>osdk_ProfileId_structSize
+<span class="w">        </span><span class="m">305</span><span class="w">  </span><span class="m">130</span><span class="w"> </span>000BFF50<span class="w"> </span>osdk_UInt32ToAscii
+<span class="w">        </span><span class="m">306</span><span class="w">  </span><span class="m">131</span><span class="w"> </span>000BFF70<span class="w"> </span>osdk_UInt32ToAsciiLength
+<span class="w">        </span><span class="m">307</span><span class="w">  </span><span class="m">132</span><span class="w"> </span>000BFFB0<span class="w"> </span>osdk_UInt64ToAscii
+<span class="w">        </span><span class="m">308</span><span class="w">  </span><span class="m">133</span><span class="w"> </span>000BFFD0<span class="w"> </span>osdk_UInt64ToAsciiLength
+<span class="w">        </span><span class="m">313</span><span class="w">  </span><span class="m">138</span><span class="w"> </span>000C2B40<span class="w"> </span>osdk_UserAccountType_Get
+<span class="w">        </span><span class="m">314</span><span class="w">  </span><span class="m">139</span><span class="w"> </span>000A57C0<span class="w"> </span>osdk_UserId_structSize
+<span class="w">        </span><span class="m">315</span><span class="w">  </span>13A<span class="w"> </span>000A5840<span class="w"> </span>osdk_UserInfo_constructCopy
+<span class="w">        </span><span class="m">316</span><span class="w">  </span>13B<span class="w"> </span>000A5850<span class="w"> </span>osdk_UserInfo_move
+<span class="w">        </span><span class="m">317</span><span class="w">  </span>13C<span class="w"> </span>000A58B0<span class="w"> </span>osdk_UserInfo_structSize
+<span class="w">        </span><span class="m">329</span><span class="w">  </span><span class="m">148</span><span class="w"> </span>000C2E00<span class="w"> </span>osdk_Variant_ConstructUInt16
+<span class="w">        </span><span class="m">336</span><span class="w">  </span>14F<span class="w"> </span>000C3210<span class="w"> </span>osdk_VersionValues_Get
+<span class="w">        </span><span class="m">337</span><span class="w">  </span><span class="m">150</span><span class="w"> </span>000C3220<span class="w"> </span>osdk_Version_Parse
+<span class="w">        </span><span class="m">338</span><span class="w">  </span><span class="m">151</span><span class="w"> </span>000C32E0<span class="w"> </span>osdk_Version_fromParts
+<span class="w">        </span><span class="m">339</span><span class="w">  </span><span class="m">152</span><span class="w"> </span>000C3320<span class="w"> </span>osdk_Version_toString
+<span class="w">        </span><span class="m">340</span><span class="w">  </span><span class="m">153</span><span class="w"> </span>000A71A0<span class="w"> </span>osdk_WebServiceClientAttributeKeys_Get
+<span class="w">        </span><span class="m">341</span><span class="w">  </span><span class="m">154</span><span class="w"> </span>000A97A0<span class="w"> </span>osdk_WebServiceClientBuilder_Create
+<span class="w">        </span><span class="m">342</span><span class="w">  </span><span class="m">155</span><span class="w"> </span>000A97C0<span class="w"> </span>osdk_WebServiceClientBuilder_build
+<span class="w">        </span><span class="m">360</span><span class="w">  </span><span class="m">167</span><span class="w"> </span>000A6A10<span class="w"> </span>osdk_WebServiceClient_addStatisticsDeserializationMilliseconds
+<span class="w">        </span><span class="m">387</span><span class="w">  </span><span class="m">182</span><span class="w"> </span>000A3C90<span class="w"> </span>osdk_addProcessCallback
+<span class="w">        </span><span class="m">388</span><span class="w">  </span><span class="m">183</span><span class="w"> </span>000A3CA0<span class="w"> </span>osdk_beginNewGameSession
 </pre></div>
 <p>Some of the entries were removed due to being too long. This was my breakthrough, this library is responsible for the communications and it appears to be done in JSON! </p>
 <p>Digging around the <strong>strings</strong> I noticed it was using <code>libcurl</code> which is also awesome, but also <code>libuv</code> which could pose serious problems for debugging and tracing. IDA wasn't picking cURL's function names so I had to use one of the community FLIRT databases, <a href="https://github.com/Maktm/FLIRTDB">FLIRTDB</a>, which was key in finding functions such as <code>curl_easy_setopt</code>.
 cURL has two interfaces the <code>easy</code> and the <code>multi</code>, the latter being focused in asynchronous programming. Even though it uses <code>libuv</code> all the connections are done via the <strong>easy</strong> interface.</p>
 <p>Having the targets isolated it was time to add some logging. In this case I resorted to dll proxying which consists of substituting the original module with a one created by me and redirecting all the calls to the original one. Microsoft Visual C compiler makes it super easy with a simple pragma directive.</p>
-<div class="highlight"><pre><span></span><span class="n">__pragma</span><span class="w"> </span><span class="p">(</span><span class="n">comment</span><span class="w"> </span><span class="p">(</span><span class="n">linker</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/export:&quot;</span><span class="w"> </span><span class="n">export_name</span><span class="w"> </span><span class="s">&quot;=&quot;</span><span class="w"> </span><span class="n">original_dll_name</span><span class="p">.</span><span class="n">export_name</span><span class="w"> </span><span class="s">&quot;,@&quot;</span><span class="w"> </span><span class="n">ordinal</span><span class="p">))</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="n">__pragma</span><span class="w"> </span><span class="p">(</span><span class="n">comment</span><span class="w"> </span><span class="p">(</span><span class="n">linker</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/export:&quot;</span><span class="w"> </span><span class="n">export_name</span><span class="w"> </span><span class="s">&quot;=&quot;</span><span class="w"> </span><span class="n">original_dll_name</span><span class="p">.</span><span class="n">export_name</span><span class="w"> </span><span class="s">&quot;,@&quot;</span><span class="w"> </span><span class="n">ordinal</span><span class="p">))</span>
 </pre></div>
 <p>In this case I renamed <code>osdk.dll</code> to <code>osdk_orig.dll</code>, the new module exported the exact same functions which just forwarded to the original.</p>
 <div class="highlight"><pre><span></span><span class="cp">#define FORWARDED_EXPORT_WITH_ORDINAL(exp_name, ordinal, target_name) __pragma (comment (linker, &quot;/export:&quot; #exp_name &quot;=&quot; #target_name &quot;,@&quot; #ordinal))</span>
 
-<span class="n">FORWARDED_EXPORT_WITH_ORDINAL</span><span class="p">(</span><span class="n">osdk_Allocator_Free</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">osdk_orig</span><span class="p">.</span><span class="n">osdk_Allocator_Free</span><span class="p">)</span><span class="w"></span>
-<span class="n">FORWARDED_EXPORT_WITH_ORDINAL</span><span class="p">(</span><span class="n">osdk_Allocator_Init</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">osdk_orig</span><span class="p">.</span><span class="n">osdk_Allocator_Init</span><span class="p">)</span><span class="w"></span>
+<span class="n">FORWARDED_EXPORT_WITH_ORDINAL</span><span class="p">(</span><span class="n">osdk_Allocator_Free</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">osdk_orig</span><span class="p">.</span><span class="n">osdk_Allocator_Free</span><span class="p">)</span>
+<span class="n">FORWARDED_EXPORT_WITH_ORDINAL</span><span class="p">(</span><span class="n">osdk_Allocator_Init</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">osdk_orig</span><span class="p">.</span><span class="n">osdk_Allocator_Init</span><span class="p">)</span>
 
-<span class="p">(...)</span><span class="w"></span>
+<span class="p">(...)</span>
 </pre></div>
 <p>DLL Proxying has also another big advantage, since <code>DllMain</code> runs before the main executable(the ones of the modules that are explicitly imported!), it's the safest place to perform any hooks/patches. Other methods such as DLL Injection require creating an extra thread which might cause some racing issues.</p>
 <p>Here I run into another problem, for some reason <code>GetModuleHandle</code> was always returning 0, except when the argument was <code>NULL</code>. Calling <code>ntdll!LdrGetDllHandle</code> also yielded 0 and even walking the LDR table from PEB(Process Environment Block), yield no modules which was extremely suspicious.</p>
@@ -160,49 +160,49 @@ cURL has two interfaces the <code>easy</code> and the <code>multi</code>, the la
 <p>Since my dll depends on <code>osdk_orig.dll</code> then it must be loaded after the original one, thus my call of <code>LoadLibrary</code> does not violate the condition of modifying the module list! Luckily it worked and <code>GetProcAddress</code> was also working. Using <code>osdk_Allocator_Init</code> as a pivot, the <strong>offsets</strong> to all the relevant functions inside <code>osdk_orig.dll</code> were calculated and relevant functions hooked. It was time to start logging!</p>
 <h3>Logging curl_easy_setopt</h3>
 <p>Performing requests with cURL is quite straightforward, first create a <code>CURL*</code> handle with <code>curl_easy_init</code> and then set <strong>ALL</strong> connection related settings/parameters <code>curl_easy_setopt</code>. The function prototype is as follows:</p>
-<div class="highlight"><pre><span></span><span class="n">CURLcode</span><span class="w"> </span><span class="nf">curl_easy_setopt</span><span class="p">(</span><span class="n">CURL</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">CURLoption</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">parameter</span><span class="p">);</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="n">CURLcode</span><span class="w"> </span><span class="nf">curl_easy_setopt</span><span class="p">(</span><span class="n">CURL</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">CURLoption</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">parameter</span><span class="p">);</span>
 </pre></div>
 <p>The first argument was already discussed, the second one is an <em>enum</em> which specifies which option will be set and the third argument is the data related to the parameter. E.g with option <code>CURLOPT_URL</code> the parameter would be a null-terminated string of the url.</p>
 <p>Hooking this function was done with a <strong>trampoline</strong>, which consists of over-writing the function prologue with something like this:</p>
-<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="nb">rax</span><span class="p">,</span><span class="w"> </span><span class="nv">ADDRESS_OF_MY_DETOUR</span><span class="w"></span>
-<span class="nf">push</span><span class="w"> </span><span class="nb">rax</span><span class="w"></span>
-<span class="nf">ret</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="nb">rax</span><span class="p">,</span><span class="w"> </span><span class="nv">ADDRESS_OF_MY_DETOUR</span>
+<span class="nf">push</span><span class="w"> </span><span class="nb">rax</span>
+<span class="nf">ret</span>
 </pre></div>
 <p>One cool thing I learned about cURL's internals is that it uses a self-defined macro to enforce 3 arguments but the function still works with <code>va_args</code>?</p>
-<div class="highlight"><pre><span></span><span class="o">============</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">curl</span><span class="p">.</span><span class="n">h</span><span class="w"> </span><span class="o">======================</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="o">============</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">curl</span><span class="p">.</span><span class="n">h</span><span class="w"> </span><span class="o">======================</span>
 <span class="cm">/* This preprocessor magic that replaces a call with the exact same call is</span>
 <span class="cm">   only done to make sure application authors pass exactly three arguments</span>
-<span class="cm">   to these functions. */</span><span class="w"></span>
+<span class="cm">   to these functions. */</span>
 <span class="cp">#define curl_easy_setopt(handle,opt,param) curl_easy_setopt(handle,opt,param)</span>
 
-<span class="o">============</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">setopt</span><span class="p">.</span><span class="n">c</span><span class="w"> </span><span class="o">======================</span><span class="w"></span>
+<span class="o">============</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">setopt</span><span class="p">.</span><span class="n">c</span><span class="w"> </span><span class="o">======================</span>
 <span class="cp">#undef curl_easy_setopt</span>
-<span class="n">CURLcode</span><span class="w"> </span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">Curl_easy</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">CURLoption</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="kt">va_list</span><span class="w"> </span><span class="n">arg</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="n">CURLcode</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
+<span class="n">CURLcode</span><span class="w"> </span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">Curl_easy</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">CURLoption</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">va_list</span><span class="w"> </span><span class="n">arg</span><span class="p">;</span>
+<span class="w">  </span><span class="n">CURLcode</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
 
-<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">CURLE_BAD_FUNCTION_ARGUMENT</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">CURLE_BAD_FUNCTION_ARGUMENT</span><span class="p">;</span>
 
-<span class="w">  </span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span>
 
-<span class="w">  </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Curl_vsetopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">arg</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Curl_vsetopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">arg</span><span class="p">);</span>
 
-<span class="w">  </span><span class="n">va_end</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">va_end</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 <p>In order to dump the options I redefined the <strong>CURLoption</strong> <code>enum</code> by re-using their <code>CURLOPT</code> macro:</p>
 <div class="highlight"><pre><span></span><span class="cp">#define CURLOPT(na,t,nu) na = t + nu</span>
 
 <span class="c1">//CURLOPTTYPE_STRINGPOINT is a define of a constant</span>
 
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">  </span><span class="cm">/* The full URL to get/put */</span><span class="w"></span>
-<span class="w">  </span><span class="n">CURLOPT</span><span class="p">(</span><span class="n">CURLOPT_URL</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPTTYPE_STRINGPOINT</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="cm">/* The full URL to get/put */</span>
+<span class="w">  </span><span class="n">CURLOPT</span><span class="p">(</span><span class="n">CURLOPT_URL</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPTTYPE_STRINGPOINT</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 <p>This is where the beauty of C comes, for logging it's much more convenient to have the options in text format and not integers like <code>enums</code> are. The <em>stringification preprocessor</em> was the key for this problem, the <code>#</code> sign in macros allows to turn any variable passed to a string, thus I lazily converted the <code>CURLOPT</code> macro to <code>CURLOPT_CASE</code> as follows:</p>
 <div class="highlight"><pre><span></span><span class="cp">#define CURLOPT_CASE(name, ignore, ignore1) \</span>
@@ -210,13 +210,13 @@ cURL has two interfaces the <code>easy</code> and the <code>multi</code>, the la
 <span class="cp">	logger(&quot;setopt: %s (%d)\n&quot;, #name, name);\</span>
 <span class="cp">	break;</span>
 
-<span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">			</span><span class="n">CURLOPT_CASE</span><span class="p">(</span><span class="n">CURLOPT_WRITEDATA</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_CASETYPE_OBJECTPOINT</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="n">CURLOPT_CASE</span><span class="p">(</span><span class="n">CURLOPT_WRITEDATA</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_CASETYPE_OBJECTPOINT</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 
-<span class="w">			</span><span class="n">CURLOPT_CASE</span><span class="p">(</span><span class="n">CURLOPT_URL</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_CASETYPE_STRINGPOINT</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="p">(...)</span><span class="w"></span>
+<span class="w">			</span><span class="n">CURLOPT_CASE</span><span class="p">(</span><span class="n">CURLOPT_URL</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_CASETYPE_STRINGPOINT</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<span class="w">		</span><span class="p">(...)</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 <p>The result:</p>
 <div class="highlight"><pre><span></span>setopt: CURLOPT_PRIVATE (10103)
@@ -234,10 +234,10 @@ setopt: CURLOPT_WRITEDATA (10001)
 </pre></div>
 <h3>Establishing connection to own server</h3>
 <p>cURL by default performs host and peer verification with HTTPS connections, this means it must be disabled dynamically. To disable <code>curl_easy_setopt</code> needs to be called with <code>CURLOPT_VERIFYPEER</code> and <code>CURLOPT_VERIFYHOST</code> with the parameter set as 0. My solution was to inject these two calls right after <code>CURLOPT_URL</code> is set, this guarantees that it's set for all cURL handles.</p>
-<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CURLOPT_URL</span><span class="p">){</span><span class="w"></span>
-<span class="w">		</span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_SSL_VERIFYHOST</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_SSL_VERIFYPEER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CURLOPT_URL</span><span class="p">){</span>
+<span class="w">		</span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_SSL_VERIFYHOST</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">CURLOPT_SSL_VERIFYPEER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 <p>For the server I was using flask which has a really useful option <code>ssl_context=&#x27;adhoc&#x27;</code> which allows to generate TLS certificates on the fly, which are marked as <code>Dummy Certificate</code>. With the verification disabled and traffic redirection(via DNS) done it was time to start logging endpoints and the incoming traffic. Now I had a way of logging what the client sent, it was time to log what the server sent.</p>
 <p>The result:</p>
@@ -258,63 +258,63 @@ setopt: CURLOPT_WRITEDATA (10001)
 <h3>CURLOPT_READFUNCTION/CURLOPT_WRITEFUNCTION Hook</h3>
 <p>The nomenclature on these functions is a little confusing at first since <code>READ</code> is what the server wants to <em>read</em> from the client and <code>WRITE</code> is what the server <em>wrote</em> to the client. These options setup the callback function when any of these actions occur. The buffers that these functions receive are in a decrypted state, thus logging the packets it's just a matter of <code>printf</code>.</p>
 <p>Since I already controlled what is passed to <code>curl_easy_setopt</code> it was quite easy to replace <code>osdks_orig</code> callback with mine:</p>
-<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write_callback_ptr</span><span class="p">)(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span><span class="w"></span>
-<span class="n">write_callback_ptr</span><span class="w"> </span><span class="n">write_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="kt">size_t</span><span class="w"> </span><span class="nf">write_callback</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write_callback_ptr</span><span class="p">)(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span>
+<span class="n">write_callback_ptr</span><span class="w"> </span><span class="n">write_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">write_callback</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;got write(%p) here(%d) %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">write_callback_orig</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-
-<span class="k">typedef</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read_callback_ptr</span><span class="p">)(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nitems</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span><span class="w"></span>
-<span class="n">read_callback_ptr</span><span class="w"> </span><span class="n">read_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="kt">size_t</span><span class="w"> </span><span class="nf">read_callback</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nitems</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-
-<span class="w">	</span><span class="kt">size_t</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read_callback_orig</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">nitems</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;got read here %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-<span class="n">DWORD64</span><span class="w"> </span><span class="nf">curl_easy_setopt</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">Curl_easy</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">DWORD64</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="n">print_setopt</span><span class="p">(</span><span class="n">tag</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="kt">va_list</span><span class="w"> </span><span class="n">arg</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">DWORD64</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">43</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">	</span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;got write(%p) here(%d) %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">write_callback_orig</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span>
+<span class="p">}</span>
 
 
-<span class="w">	</span><span class="p">(...)</span><span class="w"></span>
-<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CURLOPT_WRITEFUNCTION</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read_callback_ptr</span><span class="p">)(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nitems</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span>
+<span class="n">read_callback_ptr</span><span class="w"> </span><span class="n">read_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">read_callback</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nitems</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">		</span><span class="n">write_callback_ptr</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">write_callback_ptr</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="kt">size_t</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read_callback_orig</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">nitems</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span>
+<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;got read here %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">DWORD64</span><span class="w"> </span><span class="nf">curl_easy_setopt</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">Curl_easy</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">DWORD64</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="n">print_setopt</span><span class="p">(</span><span class="n">tag</span><span class="p">);</span>
+<span class="w">	</span><span class="kt">va_list</span><span class="w"> </span><span class="n">arg</span><span class="p">;</span>
+<span class="w">	</span><span class="n">DWORD64</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="p">)</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">43</span><span class="p">;</span>
+
+<span class="w">	</span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span>
+
+
+<span class="w">	</span><span class="p">(...)</span>
+<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CURLOPT_WRITEFUNCTION</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">		</span><span class="n">write_callback_ptr</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">write_callback_ptr</span><span class="p">);</span>
 <span class="w">		</span>
-<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tmp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">write_callback</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">			</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;Will spoof write callback %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">write_callback</span><span class="p">);</span><span class="w"></span>
-<span class="w">			</span><span class="n">write_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">write_callback</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tmp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">write_callback</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;Will spoof write callback %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">write_callback</span><span class="p">);</span>
+<span class="w">			</span><span class="n">write_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">write_callback</span><span class="p">);</span>
+<span class="w">		</span><span class="p">}</span>
 
-<span class="w">		</span><span class="n">va_end</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
-<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CURLOPT_READFUNCTION</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">		</span><span class="n">va_end</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span>
+<span class="w">		</span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tag</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CURLOPT_READFUNCTION</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">		</span><span class="n">read_callback_ptr</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">read_callback_ptr</span><span class="p">);</span><span class="w"></span>
+<span class="w">		</span><span class="n">read_callback_ptr</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">read_callback_ptr</span><span class="p">);</span>
 
-<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tmp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">read_callback</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">			</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;Will spoof read callback %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">read_callback</span><span class="p">);</span><span class="w"></span>
-<span class="w">			</span><span class="n">read_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">read_callback</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tmp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">read_callback</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;Will spoof read callback %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">read_callback</span><span class="p">);</span>
+<span class="w">			</span><span class="n">read_callback_orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">curl_easy_setopt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">read_callback</span><span class="p">);</span>
+<span class="w">		</span><span class="p">}</span>
 
-<span class="w">		</span><span class="n">va_end</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="n">va_end</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span>
+<span class="w">		</span><span class="n">va_start</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
 </pre></div>
 <p>The result:</p>
 <div class="highlight"><pre><span></span>got read here {
@@ -353,17 +353,17 @@ got write(0000000170938590) here(873) {
 <p>For small responses like the ones showed above it was all fine and dandy. There are some responses such as for Market, Wartable and level jsons(yes, each level has a json) which are huge, not only they contain a ton of data but also the text displayed in <strong>ALL</strong> available languages. The biggest mission I have recorded is 47KB and it's <em>Condition: Green</em>.</p>
 <p>The functions hooked above get called as soon there's data so there were times that they're called with as little as 8 characters in the buffer, rebuilding them by hand would be a nightmare since they're all scattered around the logs.</p>
 <p>The solution to this problem was also provided by <code>libcurl</code> interface. The write and read callbacks contain a 4th parameter which is defined in the documentation as <code>userdata</code>. This parameter works like an accumulator, incoming data comes from <code>ptr</code> and should be stored in <code>userdata</code>. Due to the fact the game uses different buffers for different requests, it was the best way to get complete packet dumps. The implemented solution was not the most performant(it's pretty bad) but it served it's purpose. It consisted in creating and appending to a text file with the name of the buffer's address - a few minutes in the game exploring all the missions was enough to get all the JSON responses.</p>
-<div class="highlight"><pre><span></span><span class="kt">size_t</span><span class="w"> </span><span class="nf">write_callback</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kt">size_t</span><span class="w"> </span><span class="nf">write_callback</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">userdata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;got write(%p) here(%d) %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">tmp</span><span class="p">[</span><span class="mi">255</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="n">sprintf</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;[REDACTED]</span><span class="se">\\</span><span class="s">%p.txt&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;got write(%p) here(%d) %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">);</span>
+<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">tmp</span><span class="p">[</span><span class="mi">255</span><span class="p">];</span>
+<span class="w">	</span><span class="n">sprintf</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;[REDACTED]</span><span class="se">\\</span><span class="s">%p.txt&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span>
 
-<span class="w">	</span><span class="kt">FILE</span><span class="o">*</span><span class="w"> </span><span class="n">fp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fopen</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;a+&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">fwrite</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">fp</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">write_callback_orig</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="kt">FILE</span><span class="o">*</span><span class="w"> </span><span class="n">fp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fopen</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;a+&quot;</span><span class="p">);</span>
+<span class="w">	</span><span class="n">fwrite</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">fp</span><span class="p">);</span>
+<span class="w">	</span><span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">write_callback_orig</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">nmemb</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 <p>Logging the read callback turned useless, which will be explained in the next section.</p>
 <p>The results:</p>
@@ -475,7 +475,7 @@ X-Iinfo: [REDACTED]
 <h3>Beta over and emulator stops working</h3>
 <p>As soon as the beta was over it was time to really test my emulator aaaaaaaaaaaaaaand it got stuck at logging in. The problem was not apparent at all, since lots of requests were creating errors but the game was still playable. Looking at the logs something caught my attention, the <code>login</code> endpoint was throwing a <code>405 Method Not Allowed</code>, now this is interesting. I had it setup to accept both <code>GET</code> and <code>POST</code> so what the hell was it trying to do?
 Checking the HTTP headers it became clear what was happening, the client was prefixing the HTTP method with a JSON token.</p>
-<div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;userSandbox&quot;</span><span class="p">:</span><span class="s2">&quot;steam&quot;</span><span class="p">,</span><span class="nt">&quot;user&quot;</span><span class="p">:{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">,</span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="s2">&quot;steam_id&quot;</span><span class="p">},</span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="s2">&quot;windows&quot;</span><span class="p">,</span><span class="nt">&quot;identity&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;steam_token&quot;</span><span class="p">,</span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">}}</span><span class="err">POST</span><span class="w"> </span><span class="err">/api</span><span class="c1">//login</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;userSandbox&quot;</span><span class="p">:</span><span class="s2">&quot;steam&quot;</span><span class="p">,</span><span class="nt">&quot;user&quot;</span><span class="p">:{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">,</span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="s2">&quot;steam_id&quot;</span><span class="p">},</span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="s2">&quot;windows&quot;</span><span class="p">,</span><span class="nt">&quot;identity&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;steam_token&quot;</span><span class="p">,</span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="s2">&quot;[redacted]&quot;</span><span class="p">}}</span><span class="err">POST</span><span class="w"> </span><span class="err">/api</span><span class="c1">//login</span>
 </pre></div>
 <p>Square has their reasons for doing this, it probably gets filtered on the listener webserver before even hitting the node responsible before dealing with the request.</p>
 <p>The solution was not the best but it did the trick:</p>
@@ -493,73 +493,73 @@ Checking the HTTP headers it became clear what was happening, the client was pre
 <div class="highlight"><pre><span></span>eyJhbGciOiJIUzI1NiJ9.eyJsb2MiOiJCRS1XQUwiLCJzdWIiOiI2OSIsImF0eSI6InByb2QiLCJjbXUiOiJzdGVhbSIsInVieCI6InN0ZWFtIiwic3lzIjoid2luZG93cyIsInJvbCI6WyJwbGF5QGNyeS10cm12Ni1iZXRhLXByb2Q6cmV0YWlsIl0sImlkcCI6InN0ZWFtX2lkIiwic2VnIjoiTmozdHROSExCZl9IZ1A3R1U5VTBZS0tZeUN0cXAyTDAiLCJjYngiOiJkZWZhdWx0Iiwic2VtIjoiMjIzMDI3MDMiLCJ0YWciOiJ0aGljYyBib2kiLCJza3UiOiIxMzU4ODIwIiwiZXhwIjoxNTk4MjQwNDI2LCJpYXQiOjE1OTgxOTcyMjZ9.eyJiYW5hbmEiOjF9
 </pre></div>
 <p>It looked like base64 so I decoded it and quickly learned it was a JWT(JSON Web Token). They're composed of three parts, seperated by a period - Header(defines signature algorithm), Payload(data) and Signature. The first two parts are base64 encoded and are JSONS such as these ones:</p>
-<div class="highlight"><pre><span></span><span class="c1">//Header</span><span class="w"></span>
-<span class="p">{</span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="s2">&quot;HS256&quot;</span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="c1">//Header</span>
+<span class="p">{</span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="s2">&quot;HS256&quot;</span><span class="p">}</span>
 
 
-<span class="c1">//Payload</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BE-WAL&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;69&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;aty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cmu&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;steam&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;ubx&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;steam&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sys&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;windows&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;rol&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;play@cry-trmv6-beta-prod:retail&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;idp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;steam_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;seg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Nj3ttNHLBf_HgP7GU9U0YKKYyCtqp2L0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cbx&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sem&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;22302703&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;tag&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;thicc boi&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1358820&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1598240426</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1598197226</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="c1">//Payload</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;loc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BE-WAL&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;69&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cmu&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;steam&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;ubx&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;steam&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sys&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;windows&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;rol&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;play@cry-trmv6-beta-prod:retail&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;idp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;steam_id&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;seg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Nj3ttNHLBf_HgP7GU9U0YKKYyCtqp2L0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cbx&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sem&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;22302703&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tag&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;thicc boi&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1358820&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1598240426</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1598197226</span>
+<span class="p">}</span>
 </pre></div>
 <p>I read some articles on how to forge one, with methods that include changing the algorithm, <code>&#x27;alg&#x27;:&#x27;none&#x27;</code>, my tests were a success I had succesfully bypassed the signature of JWT. In the meantime I had also isolated the routine responsible for the login procedure which is conveniently named <code>OnlineSuiteIdentityProvider::PerformLogin</code>. Something was off, there didn't appear to be any signature checking. In fact changing the <code>alg</code> or even the signature worked just fine.</p>
 <p>The reason was that the game was trimming the string on the periods, thus only looking at the payload, there was <strong>NO SIGNATURE CHECK</strong>. Why even use JWT if the signature is not enforced?</p>
 <p>Here's the excerpt from the responsible function:</p>
-<div class="highlight"><pre><span></span><span class="kr">__int64</span><span class="w"> </span><span class="kr">__fastcall</span><span class="w"> </span><span class="n">sub_180099260</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">a1</span><span class="p">,</span><span class="w"> </span><span class="kr">__int64</span><span class="w"> </span><span class="n">a2</span><span class="p">,</span><span class="w"> </span><span class="kr">__int64</span><span class="w"> </span><span class="n">a3</span><span class="p">){</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kr">__int64</span><span class="w"> </span><span class="kr">__fastcall</span><span class="w"> </span><span class="n">sub_180099260</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">a1</span><span class="p">,</span><span class="w"> </span><span class="kr">__int64</span><span class="w"> </span><span class="n">a2</span><span class="p">,</span><span class="w"> </span><span class="kr">__int64</span><span class="w"> </span><span class="n">a3</span><span class="p">){</span>
 <span class="w">	</span><span class="cm">/*</span>
 <span class="cm">		removed</span>
-<span class="cm">	*/</span><span class="w"></span>
+<span class="cm">	*/</span>
 <span class="w"> </span><span class="n">v14</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">memchr</span><span class="p">(</span><span class="n">v13</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;.&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">_QWORD</span><span class="p">)</span><span class="n">v13</span><span class="p">);</span><span class="w">    </span><span class="c1">// finds first period</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v14</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">v12</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">v14</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">osdk_String_end</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">v15</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">_QWORD</span><span class="p">)</span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v15</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="n">v16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osdk_String_end</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
-<span class="w">      </span><span class="n">v17</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v14</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="n">v12</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">v14</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">osdk_String_end</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">v15</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v12</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">_QWORD</span><span class="p">)</span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v15</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">v16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osdk_String_end</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
+<span class="w">      </span><span class="n">v17</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
 <span class="w">      </span><span class="n">v18</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">memchr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v17</span><span class="p">[</span><span class="n">v15</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="sc">&#39;.&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">v16</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">_QWORD</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v17</span><span class="p">[</span><span class="n">v15</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">]);</span><span class="c1">// finds second period</span>
-<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v18</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">        </span><span class="n">v16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">v18</span><span class="p">;</span><span class="w"></span>
-<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v16</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">osdk_String_end</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">v19</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v16</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">_QWORD</span><span class="p">)</span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v19</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
-<span class="w">          </span><span class="n">v103</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">i64</span><span class="p">;</span><span class="w"></span>
-<span class="w">          </span><span class="n">v104</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">i64</span><span class="p">;</span><span class="w"></span>
-<span class="w">          </span><span class="n">v103</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">)[</span><span class="n">v15</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
-<span class="w">          </span><span class="n">v104</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">v19</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">v15</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x7FFFFFFFFFFFFFFF</span><span class="n">i64</span><span class="p">;</span><span class="w"></span>
-<span class="w">          </span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
-<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">v121</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">            </span><span class="n">osdk_String_length</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span><span class="w"></span>
-<span class="w">          </span><span class="n">base64decode</span><span class="p">((</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v109</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v103</span><span class="p">);</span><span class="w"></span>
-<span class="w">          </span><span class="n">v99</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">i64</span><span class="p">;</span><span class="w"></span>
-<span class="w">          </span><span class="n">jsonparse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v99</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v109</span><span class="p">);</span><span class="w"></span>
-<span class="w">          </span><span class="n">v20</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">v99</span><span class="p">;</span><span class="w"></span>
-<span class="w">          </span><span class="n">handlepayload</span><span class="p">((</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v125</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">v99</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v18</span><span class="w"> </span><span class="p">)</span>
+<span class="w">        </span><span class="n">v16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">v18</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v16</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">osdk_String_end</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="n">v19</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v16</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">_QWORD</span><span class="p">)</span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v19</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
+<span class="w">          </span><span class="n">v103</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">i64</span><span class="p">;</span>
+<span class="w">          </span><span class="n">v104</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">i64</span><span class="p">;</span>
+<span class="w">          </span><span class="n">v103</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">)[</span><span class="n">v15</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+<span class="w">          </span><span class="n">v104</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">v19</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">v15</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x7FFFFFFFFFFFFFFF</span><span class="n">i64</span><span class="p">;</span>
+<span class="w">          </span><span class="n">osdk_String_begin</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">v121</span><span class="w"> </span><span class="p">)</span>
+<span class="w">            </span><span class="n">osdk_String_length</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v121</span><span class="p">);</span>
+<span class="w">          </span><span class="n">base64decode</span><span class="p">((</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v109</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v103</span><span class="p">);</span>
+<span class="w">          </span><span class="n">v99</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">i64</span><span class="p">;</span>
+<span class="w">          </span><span class="n">jsonparse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v99</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v109</span><span class="p">);</span>
+<span class="w">          </span><span class="n">v20</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">v99</span><span class="p">;</span>
+<span class="w">          </span><span class="n">handlepayload</span><span class="p">((</span><span class="kr">__int64</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v125</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">v99</span><span class="p">);</span>
 <span class="w">	</span><span class="cm">/*</span>
 <span class="cm">		removed</span>
-<span class="cm">	*/</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="cm">	*/</span>
+<span class="p">}</span>
 </pre></div>
 <p>With all of these the first iteration of the server emulator was complete!</p>
 <h3>No more HOSTS file</h3>
@@ -572,43 +572,43 @@ getaddrinfo(); // function of ws2_32.dll
 call [iat_entry_for_getaddrinfo]; [] are a dereference in assembly
 </pre></div>
 <p>Thus if I know the offset of a call to <code>getaddrinfo</code> I can easily get it's address on table and replace it with function. Checking x-refs in IDA yielded two results inside <code>Curl_getaddrinfo_ex</code>.</p>
-<div class="highlight"><pre><span></span><span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">Curl_getaddrinfo_ex</span><span class="w"> </span><span class="nv">proc</span><span class="w"> </span><span class="nv">near</span><span class="w">           </span><span class="c1">; CODE XREF: sub_1800018C0+100?p</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w">                                         </span><span class="c1">; getaddrinfo_thread+50?p ...</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">arg_0</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="nv">ptr</span><span class="w">  </span><span class="mi">8</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">arg_8</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="nv">ptr</span><span class="w">  </span><span class="mh">10h</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">ppResult</span><span class="w">        </span><span class="err">=</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="nv">ptr</span><span class="w">  </span><span class="mh">20h</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">rbp</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005542</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">rsi</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005543</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">r12</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005545</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">r14</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005547</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">r15</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005549</span><span class="w">                 </span><span class="nf">sub</span><span class="w">     </span><span class="nb">rsp</span><span class="p">,</span><span class="w"> </span><span class="mh">20h</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">000000018000554</span><span class="nf">D</span><span class="w">                 </span><span class="nv">xor</span><span class="w">     </span><span class="nb">r12d</span><span class="p">,</span><span class="w"> </span><span class="nb">r12d</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005550</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="nb">r15</span><span class="p">,</span><span class="w"> </span><span class="nb">r9</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005553</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="p">[</span><span class="nb">r9</span><span class="p">],</span><span class="w"> </span><span class="nb">r12</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005556</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="nb">esi</span><span class="p">,</span><span class="w"> </span><span class="nb">r12d</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005559</span><span class="w">                 </span><span class="nf">lea</span><span class="w">     </span><span class="nb">r9</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="nb">rsp</span><span class="o">+</span><span class="mh">48h</span><span class="o">+</span><span class="nv">ppResult</span><span class="p">]</span><span class="w"> </span><span class="c1">; ppResult</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">000000018000555</span><span class="nf">E</span><span class="w">                 </span><span class="nv">mov</span><span class="w">     </span><span class="nb">r14d</span><span class="p">,</span><span class="w"> </span><span class="nb">r12d</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005561</span><span class="w">                 </span><span class="nf">call</span><span class="w">    </span><span class="nb">cs</span><span class="p">:</span><span class="nv">getaddrinfo</span><span class="w"> </span><span class="c1">;&lt;-----------</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005567</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="nb">ebp</span><span class="p">,</span><span class="w"> </span><span class="nb">eax</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">0000000180005569</span><span class="w">                 </span><span class="nf">test</span><span class="w">    </span><span class="nb">eax</span><span class="p">,</span><span class="w"> </span><span class="nb">eax</span><span class="w"></span>
-<span class="nl">.text:</span><span class="err">000000018000556</span><span class="nf">B</span><span class="w">                 </span><span class="nv">jnz</span><span class="w">     </span><span class="nv">loc_1800056B8</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">Curl_getaddrinfo_ex</span><span class="w"> </span><span class="nv">proc</span><span class="w"> </span><span class="nv">near</span><span class="w">           </span><span class="c1">; CODE XREF: sub_1800018C0+100?p</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w">                                         </span><span class="c1">; getaddrinfo_thread+50?p ...</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">arg_0</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="nv">ptr</span><span class="w">  </span><span class="mi">8</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">arg_8</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="nv">ptr</span><span class="w">  </span><span class="mh">10h</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w"> </span><span class="nf">ppResult</span><span class="w">        </span><span class="err">=</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="nv">ptr</span><span class="w">  </span><span class="mh">20h</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span>
+<span class="nl">.text:</span><span class="err">0000000180005540</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">rbp</span>
+<span class="nl">.text:</span><span class="err">0000000180005542</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">rsi</span>
+<span class="nl">.text:</span><span class="err">0000000180005543</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">r12</span>
+<span class="nl">.text:</span><span class="err">0000000180005545</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">r14</span>
+<span class="nl">.text:</span><span class="err">0000000180005547</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="nb">r15</span>
+<span class="nl">.text:</span><span class="err">0000000180005549</span><span class="w">                 </span><span class="nf">sub</span><span class="w">     </span><span class="nb">rsp</span><span class="p">,</span><span class="w"> </span><span class="mh">20h</span>
+<span class="nl">.text:</span><span class="err">000000018000554</span><span class="nf">D</span><span class="w">                 </span><span class="nv">xor</span><span class="w">     </span><span class="nb">r12d</span><span class="p">,</span><span class="w"> </span><span class="nb">r12d</span>
+<span class="nl">.text:</span><span class="err">0000000180005550</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="nb">r15</span><span class="p">,</span><span class="w"> </span><span class="nb">r9</span>
+<span class="nl">.text:</span><span class="err">0000000180005553</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="p">[</span><span class="nb">r9</span><span class="p">],</span><span class="w"> </span><span class="nb">r12</span>
+<span class="nl">.text:</span><span class="err">0000000180005556</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="nb">esi</span><span class="p">,</span><span class="w"> </span><span class="nb">r12d</span>
+<span class="nl">.text:</span><span class="err">0000000180005559</span><span class="w">                 </span><span class="nf">lea</span><span class="w">     </span><span class="nb">r9</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="nb">rsp</span><span class="o">+</span><span class="mh">48h</span><span class="o">+</span><span class="nv">ppResult</span><span class="p">]</span><span class="w"> </span><span class="c1">; ppResult</span>
+<span class="nl">.text:</span><span class="err">000000018000555</span><span class="nf">E</span><span class="w">                 </span><span class="nv">mov</span><span class="w">     </span><span class="nb">r14d</span><span class="p">,</span><span class="w"> </span><span class="nb">r12d</span>
+<span class="nl">.text:</span><span class="err">0000000180005561</span><span class="w">                 </span><span class="nf">call</span><span class="w">    </span><span class="nb">cs</span><span class="p">:</span><span class="nv">getaddrinfo</span><span class="w"> </span><span class="c1">;&lt;-----------</span>
+<span class="nl">.text:</span><span class="err">0000000180005567</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="nb">ebp</span><span class="p">,</span><span class="w"> </span><span class="nb">eax</span>
+<span class="nl">.text:</span><span class="err">0000000180005569</span><span class="w">                 </span><span class="nf">test</span><span class="w">    </span><span class="nb">eax</span><span class="p">,</span><span class="w"> </span><span class="nb">eax</span>
+<span class="nl">.text:</span><span class="err">000000018000556</span><span class="nf">B</span><span class="w">                 </span><span class="nv">jnz</span><span class="w">     </span><span class="nv">loc_1800056B8</span>
 </pre></div>
-<div class="highlight"><pre><span></span><span class="n">INT</span><span class="w"> </span><span class="n">WSAAPI</span><span class="w"> </span><span class="n">getaddrinfo_hook</span><span class="p">(</span><span class="n">PCSTR</span><span class="w"> </span><span class="n">pNodeName</span><span class="p">,</span><span class="w"> </span><span class="n">PCSTR</span><span class="w"> </span><span class="n">pServiceName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ADDRINFOA</span><span class="o">*</span><span class="w"> </span><span class="n">pHints</span><span class="p">,</span><span class="n">PADDRINFOA</span><span class="o">*</span><span class="w"> </span><span class="n">ppResult</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="n">INT</span><span class="w"> </span><span class="n">WSAAPI</span><span class="w"> </span><span class="n">getaddrinfo_hook</span><span class="p">(</span><span class="n">PCSTR</span><span class="w"> </span><span class="n">pNodeName</span><span class="p">,</span><span class="w"> </span><span class="n">PCSTR</span><span class="w"> </span><span class="n">pServiceName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ADDRINFOA</span><span class="o">*</span><span class="w"> </span><span class="n">pHints</span><span class="p">,</span><span class="n">PADDRINFOA</span><span class="o">*</span><span class="w"> </span><span class="n">ppResult</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;getaddrinfo of %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pNodeName</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="n">INT</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getaddrinfo</span><span class="p">(</span><span class="s">&quot;localhost&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pServiceName</span><span class="p">,</span><span class="w"> </span><span class="n">pHints</span><span class="p">,</span><span class="w"> </span><span class="n">ppResult</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">logger</span><span class="p">(</span><span class="s">&quot;getaddrinfo of %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pNodeName</span><span class="p">);</span>
+<span class="w">	</span><span class="n">INT</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getaddrinfo</span><span class="p">(</span><span class="s">&quot;localhost&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pServiceName</span><span class="p">,</span><span class="w"> </span><span class="n">pHints</span><span class="p">,</span><span class="w"> </span><span class="n">ppResult</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="n">HMODULE</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoadLibraryA</span><span class="p">(</span><span class="s">&quot;osdk_orig.dll&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="n">DWORD64</span><span class="w"> </span><span class="n">allocatorInit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetProcAddress</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;osdk_Allocator_Init&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="n">DWORD64</span><span class="w"> </span><span class="n">addressGetAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">getaddrinfo_hook</span><span class="p">;</span><span class="w"></span>
-<span class="n">DWORD</span><span class="w"> </span><span class="n">lmao</span><span class="p">;</span><span class="w"></span>
+<span class="n">HMODULE</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoadLibraryA</span><span class="p">(</span><span class="s">&quot;osdk_orig.dll&quot;</span><span class="p">);</span>
+<span class="n">DWORD64</span><span class="w"> </span><span class="n">allocatorInit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetProcAddress</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;osdk_Allocator_Init&quot;</span><span class="p">);</span>
+<span class="n">DWORD64</span><span class="w"> </span><span class="n">addressGetAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">getaddrinfo_hook</span><span class="p">;</span>
+<span class="n">DWORD</span><span class="w"> </span><span class="n">lmao</span><span class="p">;</span>
 <span class="n">VirtualProtect</span><span class="p">(</span><span class="n">allocatorInit</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x3A210</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">PAGE_READWRITE</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lmao</span><span class="p">);</span><span class="w"> </span><span class="c1">//allow writing to the address</span>
-<span class="n">memcpy</span><span class="p">(</span><span class="n">allocatorInit</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x3A210</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">addressGetAddr</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">addressGetAddr</span><span class="p">));</span><span class="w"></span>
+<span class="n">memcpy</span><span class="p">(</span><span class="n">allocatorInit</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x3A210</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">addressGetAddr</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">addressGetAddr</span><span class="p">));</span>
 </pre></div>
 <p>The best thing about IAT hooks is that they're module specific, this way any other module can call <code>getaddrinfo</code> and not be affected by my hook.
 This patch allows for the client to be installed just by simple drag-n-drop, no worries.</p>
@@ -623,7 +623,7 @@ This patch allows for the client to be installed just by simple drag-n-drop, no 
 		</main>
 
 		<footer class="container">
-			© 2022 krystalgamer
+			© 2023 krystalgamer
 		</footer>
 	</body>
 

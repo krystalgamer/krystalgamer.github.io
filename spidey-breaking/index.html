@@ -63,8 +63,8 @@
 <p>Couple more tries later I find it actually is showing a message box, somewhere in the code it was sending the message code to show that box.</p>
 <h1>Disabling the second CD-ROM protection</h1>
 <p>Not knowing what was sending the message I decided to xref the function that I nop'd earlier(let's call it <code>CheckCD</code>) and it was indeed called somewhere else on the program. </p>
-<div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">sub_515D80</span><span class="p">()</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">sub_515D80</span><span class="p">()</span>
+<span class="p">{</span>
 <span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"> </span><span class="c1">// eax</span>
 <span class="w">	</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"> </span><span class="c1">// ecx</span>
 <span class="w">	</span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"> </span><span class="c1">// edx</span>
@@ -72,39 +72,39 @@
 <span class="w">	</span><span class="k">struct</span><span class="w"> </span><span class="nc">tagMSG</span><span class="w"> </span><span class="n">Msg</span><span class="p">;</span><span class="w"> </span><span class="c1">// [esp+0h] [ebp-1Ch]</span>
 
 <span class="w">	</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CheckCD</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="c1">// &lt;-- checks for CD here</span>
-<span class="w">	</span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">	</span><span class="c1">//Useless loop to clog the assembly</span>
-<span class="w">	</span><span class="k">do</span><span class="w"></span>
-<span class="w">	</span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="n">v1</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
-<span class="w">	</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="k">do</span>
+<span class="w">	</span><span class="p">{</span>
+<span class="w">		</span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span>
+<span class="w">		</span><span class="n">v1</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">);</span>
 
 <span class="w">	</span><span class="c1">//if-of-death</span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="n">_BYTE</span><span class="p">)</span><span class="n">result</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">	</span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">PostMessageA</span><span class="p">(</span><span class="n">hWnd</span><span class="p">,</span><span class="w"> </span><span class="mh">0x10u</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">byte_2E098E8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">PeekMessageA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">,</span><span class="w"> </span><span class="n">hWnd</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="p">{</span><span class="w"></span>
-<span class="w">			</span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetMessageA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">,</span><span class="w"> </span><span class="n">hWnd</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">v3</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">v3</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">				</span><span class="k">break</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">Msg</span><span class="p">.</span><span class="n">message</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">260</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">Msg</span><span class="p">.</span><span class="n">message</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">261</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">			</span><span class="p">{</span><span class="w"></span>
-<span class="w">				</span><span class="n">TranslateMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">);</span><span class="w"></span>
-<span class="w">				</span><span class="n">DispatchMessageA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">);</span><span class="w"></span>
-<span class="w">			</span><span class="p">}</span><span class="w"></span>
-<span class="w">		</span><span class="p">}</span><span class="w"></span>
-<span class="w">		</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="n">_BYTE</span><span class="p">)</span><span class="n">result</span><span class="w"> </span><span class="p">)</span>
+<span class="w">	</span><span class="p">{</span>
+<span class="w">		</span><span class="n">PostMessageA</span><span class="p">(</span><span class="n">hWnd</span><span class="p">,</span><span class="w"> </span><span class="mh">0x10u</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="n">byte_2E098E8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">		</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">PeekMessageA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">,</span><span class="w"> </span><span class="n">hWnd</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">		</span><span class="p">{</span>
+<span class="w">			</span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetMessageA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">,</span><span class="w"> </span><span class="n">hWnd</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">v3</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">v3</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">)</span>
+<span class="w">				</span><span class="k">break</span><span class="p">;</span>
+<span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">Msg</span><span class="p">.</span><span class="n">message</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">260</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">Msg</span><span class="p">.</span><span class="n">message</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">261</span><span class="w"> </span><span class="p">)</span>
+<span class="w">			</span><span class="p">{</span>
+<span class="w">				</span><span class="n">TranslateMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">);</span>
+<span class="w">				</span><span class="n">DispatchMessageA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Msg</span><span class="p">);</span>
+<span class="w">			</span><span class="p">}</span>
+<span class="w">		</span><span class="p">}</span>
+<span class="w">		</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
 
 <span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">28</span><span class="w"> </span><span class="p">)</span><span class="c1">//Prevents tampering with the loop</span>
-<span class="w">		</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 <p>Now we're looking at IDA pseudo, it really helps to understand what's going on. Although it might be unreliable some times it also helps a lot.</p>
 <p>Let's discuss what's going on from easier to harder. The loop is used to fill up the assembly view with a bunch of useless instructions so the reverser has an harder time to know what's going on). If someone accidentally deletes messes the loop while patching some instructions <code>v2</code> won't be 28 so it'll leave.</p>
@@ -117,55 +117,55 @@
 <p><img src="../static/images/spidey/cdcheck_graph2.png" alt="cdrom check" /></p>
 <p>There's some string copy and finally <code>sub_516470</code> is called and the result negated and AND'd with 3, which is not a problem since the negation of zero is still zero and 3 AND 0 is still 0.</p>
 <p>To end this I'll post some pseudo to make it less boring.</p>
-<div class="highlight"><pre><span></span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_516470</span><span class="p">(</span><span class="n">_DWORD</span><span class="w"> </span><span class="o">*</span><span class="n">a1</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kt">signed</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="kr">__cdecl</span><span class="w"> </span><span class="n">sub_516470</span><span class="p">(</span><span class="n">_DWORD</span><span class="w"> </span><span class="o">*</span><span class="n">a1</span><span class="p">)</span>
+<span class="p">{</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">a1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mh">0x124</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">a1</span><span class="w"> </span><span class="p">)</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mh">0x124</span><span class="p">;</span>
+<span class="w">	</span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FindWindowA</span><span class="p">(</span><span class="n">ClassName</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FindWindowA</span><span class="p">(</span><span class="n">ClassName</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">	</span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="k">break</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="n">SendMessageA</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mh">0x10u</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="o">++</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
-<span class="w">	</span><span class="n">v19</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">	</span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">RootPathName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v19</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="sc">&#39;A&#39;</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="n">v32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">58</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="n">v33</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">92</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="n">v34</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">GetDriveTypeA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">RootPathName</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">		</span><span class="p">{</span><span class="w"></span>
+<span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FindWindowA</span><span class="p">(</span><span class="n">ClassName</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FindWindowA</span><span class="p">(</span><span class="n">ClassName</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">	</span><span class="p">{</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="p">)</span>
+<span class="w">		</span><span class="k">break</span><span class="p">;</span>
+<span class="w">		</span><span class="n">SendMessageA</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mh">0x10u</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="o">++</span><span class="n">v2</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="n">v19</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">	</span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">)</span>
+<span class="w">	</span><span class="p">{</span>
+<span class="w">		</span><span class="n">RootPathName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v19</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="sc">&#39;A&#39;</span><span class="p">;</span>
+<span class="w">		</span><span class="n">v32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">58</span><span class="p">;</span>
+<span class="w">		</span><span class="n">v33</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">92</span><span class="p">;</span>
+<span class="w">		</span><span class="n">v34</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">GetDriveTypeA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">RootPathName</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">)</span>
+<span class="w">		</span><span class="p">{</span>
 <span class="w">			</span><span class="c1">//Lots of mciSendCommandA</span>
 <span class="w">			</span><span class="c1">//breaks somewhere</span>
-<span class="w">		</span><span class="p">}</span><span class="w"></span>
-<span class="w">		</span><span class="n">v14</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__OFSUB__</span><span class="p">(</span><span class="n">v19</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">v13</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v19</span><span class="o">++</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">v13</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">v14</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="mi">351</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="p">}</span>
+<span class="w">		</span><span class="n">v14</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__OFSUB__</span><span class="p">(</span><span class="n">v19</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">);</span>
+<span class="w">		</span><span class="n">v13</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v19</span><span class="o">++</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">v13</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">v14</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="mi">351</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 <p>A lot has been cleared and altered so it's easier to understand. First it searches for <code>ClassName</code> windows which are <code>SJE_CdPlayerClass</code>. I'm not sure what they are but I think it's the one from the CD-ROM. You can start the game from there so I guess it makes sense to close them if someone goes into a level. Also it just closes until the 100 window.</p>
 <p>After that it searches for CD-ROM drives starting on A. If does find the drive then the thing read from texture.dat is compared with something from the disc, I'm not really sure since I didn't care too much about mci commands, my best bet is that it's checking if the thing read from <code>texture.dat</code> is the same, if it does it breaks and returns 0! Else it returns 351. As before with some bytepatching you can ignore the if statement and always return 0.</p>
 <p>Those final weird lines are just IDA Pro &quot;&quot;&quot;&quot;failed&quot;&quot;&quot;&quot; decompilation, I put a lot of quotes since it's correct but the decompiler wasn't able to understand the logic in way to simplify it.</p>
-<div class="highlight"><pre><span></span><span class="n">v14</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__OFSUB__</span><span class="p">(</span><span class="n">v19</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">);</span><span class="w"></span>
-<span class="n">v13</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v19</span><span class="o">++</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">v13</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">v14</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="mi">351</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="n">v14</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">__OFSUB__</span><span class="p">(</span><span class="n">v19</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">);</span>
+<span class="n">v13</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v19</span><span class="o">++</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">v13</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">v14</span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="mi">351</span><span class="p">;</span>
 
-<span class="n">Comes</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">here</span><span class="w"></span>
+<span class="n">Comes</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">here</span>
 
-<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">1</span><span class="w">                 </span><span class="n">mov</span><span class="w">     </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">VARIABLE</span><span class="p">]</span><span class="w"></span>
-<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">5</span><span class="w">                 </span><span class="n">inc</span><span class="w">     </span><span class="n">eax</span><span class="w"></span>
-<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">6</span><span class="w">                 </span><span class="n">cmp</span><span class="w">     </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="n">Ah</span><span class="p">;</span><span class="w"> </span><span class="mi">26</span><span class="w"></span>
-<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">9</span><span class="w">                 </span><span class="n">mov</span><span class="w">     </span><span class="p">[</span><span class="n">VARIABLE</span><span class="p">],</span><span class="w"> </span><span class="n">eax</span><span class="w"></span>
-<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="n">D</span><span class="w">                 </span><span class="n">jl</span><span class="w">      </span><span class="n">loc_5164D1</span><span class="w"></span>
+<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">1</span><span class="w">                 </span><span class="n">mov</span><span class="w">     </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">VARIABLE</span><span class="p">]</span>
+<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">5</span><span class="w">                 </span><span class="n">inc</span><span class="w">     </span><span class="n">eax</span>
+<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">6</span><span class="w">                 </span><span class="n">cmp</span><span class="w">     </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="n">Ah</span><span class="p">;</span><span class="w"> </span><span class="mi">26</span>
+<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="mi">9</span><span class="w">                 </span><span class="n">mov</span><span class="w">     </span><span class="p">[</span><span class="n">VARIABLE</span><span class="p">],</span><span class="w"> </span><span class="n">eax</span>
+<span class="p">.</span><span class="n">text</span><span class="o">:</span><span class="mf">005166F</span><span class="n">D</span><span class="w">                 </span><span class="n">jl</span><span class="w">      </span><span class="n">loc_5164D1</span>
 </pre></div>
 <p>Concluding, the  loop instead of <code>while(1)</code> should be <code>while(v19 &lt; 26)</code> because otherwise it would go beyond the letter Z, the last letter of the alphabet. And that's why pseudocode should always be taken as a grain of salt.</p>
 
@@ -175,7 +175,7 @@
 		</main>
 
 		<footer class="container">
-			© 2022 krystalgamer
+			© 2023 krystalgamer
 		</footer>
 	</body>
 

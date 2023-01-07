@@ -4,9 +4,18 @@
     <title>krystalgamer's Blog</title>
     <link rel="alternate" href="https://krystalgamer.github.io/" />
     <link rel="self" href="https://krystalgamer.github.io/feed.xml" />
-    <updated>2022-08-08T11:35:31Z</updated>
+    <updated>2023-01-07T11:34:14Z</updated>
     <author><name>krystalgamer</name></author>
 
+    
+    <entry>
+        <id>https://krystalgamer.github.io/high-level-game-patches/</id>
+        <title>High level mods/patches for console video-games</title>
+	<summary>This blogpost explores my journey of bringing higher level languages (in this case C) to console video-game modding, as an alternative to hand-tailored assembly mods.</summary>
+        <published>2023-01-07T00:00:00Z</published>
+        <updated>2023-01-07T00:00:00Z</updated>
+        <link rel="alternate" href="https://krystalgamer.github.io/high-level-game-patches/" />
+    </entry>
     
     <entry>
         <id>https://krystalgamer.github.io/stem-player-emulator/</id>

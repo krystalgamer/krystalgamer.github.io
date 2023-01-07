@@ -51,10 +51,10 @@
 <p>It's a container format used to store all the game's files. It was developed by Neversoft and is most known for its use on &quot;Tony Hawk Pro Skater&quot; game series.
 Since it contains all game files in order to modify anything we need to know what is going on.</p>
 <h1>Structure</h1>
-<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">magic</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">dirOffset</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="n">PKR3File</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">magic</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">dirOffset</span><span class="p">;</span>
+<span class="p">}</span><span class="n">PKR3File</span><span class="p">;</span>
 </pre></div>
 <p>The files start with a magic number <code>PKR3</code> followed by an offset to the directory tree header.</p>
 <p><img src="../static/images/spidey/pkr_header.png" alt="PKR Header" /></p>
@@ -62,35 +62,35 @@ Since it contains all game files in order to modify anything we need to know wha
 <p><img src="../static/images/spidey/pkr_strings.png" alt="PKR references" /> </p>
 <h2>Dir structure</h2>
 <h2>The header</h2>
-<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">unk</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">numDirs</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">numFiles</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="n">PKRDirHeader</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">unk</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">numDirs</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">numFiles</span><span class="p">;</span>
+<span class="p">}</span><span class="n">PKRDirHeader</span><span class="p">;</span>
 </pre></div>
 <p><em>Quick note: You'll see a lot of variables/members called <code>unk</code> due to the fact that I have no ideia of what they do and their modification not having any sign of impact on the file interpretation and not existing any references to it in the cose.</em></p>
 <p>It contains the number of directories and the <strong>total</strong> number of files that the PKR holds.</p>
 <h2>The body</h2>
-<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">name</span><span class="p">[</span><span class="mh">0x20</span><span class="p">];</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">unk</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">numFiles</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="n">PKRDir</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span>
+<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">name</span><span class="p">[</span><span class="mh">0x20</span><span class="p">];</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">unk</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">numFiles</span><span class="p">;</span>
+<span class="p">}</span><span class="n">PKRDir</span><span class="p">;</span>
 </pre></div>
 <p>After the header there's an array of PKRDirs(its lenght is defined by <code>numDirs</code>). And right after this there's a PKRFile array with the lenght of the total number of files.</p>
-<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span><span class="w"></span>
-<span class="w">	</span><span class="k">union</span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">total</span><span class="p">[</span><span class="mh">0x34</span><span class="p">];</span><span class="w"></span>
-<span class="w">		</span><span class="k">struct</span><span class="p">{</span><span class="w"></span>
-<span class="w">			</span><span class="kt">char</span><span class="w"> </span><span class="n">name</span><span class="p">[</span><span class="mh">0x20</span><span class="p">];</span><span class="w"></span>
-<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">crc</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">compressed</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">fileOffset</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">uncompressedSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">compressedSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">		</span><span class="p">};</span><span class="w"></span>
-<span class="w">	</span><span class="p">};</span><span class="w"></span>
-<span class="p">}</span><span class="n">PKRFile</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="p">{</span>
+<span class="w">	</span><span class="k">union</span><span class="p">{</span>
+<span class="w">		</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">total</span><span class="p">[</span><span class="mh">0x34</span><span class="p">];</span>
+<span class="w">		</span><span class="k">struct</span><span class="p">{</span>
+<span class="w">			</span><span class="kt">char</span><span class="w"> </span><span class="n">name</span><span class="p">[</span><span class="mh">0x20</span><span class="p">];</span>
+<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">crc</span><span class="p">;</span>
+<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">compressed</span><span class="p">;</span>
+<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">fileOffset</span><span class="p">;</span>
+<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">uncompressedSize</span><span class="p">;</span>
+<span class="w">			</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">compressedSize</span><span class="p">;</span>
+<span class="w">		</span><span class="p">};</span>
+<span class="w">	</span><span class="p">};</span>
+<span class="p">}</span><span class="n">PKRFile</span><span class="p">;</span>
 </pre></div>
 <p>As you can see the game files have integrity checks, in this case it's actually <a href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check">CRC</a>.</p>
 <p><code>compressed</code> can either hold 2(0x00000002) or -2(0xFFFFFFFE) which mean compressed and uncompressed respectively.</p>
@@ -111,7 +111,7 @@ Since it contains all game files in order to modify anything we need to know wha
 		</main>
 
 		<footer class="container">
-			© 2022 krystalgamer
+			© 2023 krystalgamer
 		</footer>
 	</body>
 

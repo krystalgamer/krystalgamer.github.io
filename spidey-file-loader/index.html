@@ -68,28 +68,28 @@ Using a tools such as <a href="https://github.com/michaellandi/exportstoc">Expor
 <h2>Writing the loader</h2>
 <p>Here's the <a href="https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L266-L288">interesting part</a> from my loader.</p>
 <div class="highlight"><pre><span></span><span class="c1">//Disable buffer allocation of pkr extracted file</span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x000519375</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193A1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x000519375</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x000519375</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193A1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x000519375</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
 
 <span class="w">	</span><span class="c1">//Disable fread of the file and the error</span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x005193C5</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193CA</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x005193C5</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x005193D0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">twoByteJmp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x005193D2</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193FD</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x005193D2</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x005193C5</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193CA</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x005193C5</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x005193D0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">twoByteJmp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x005193D2</span><span class="p">,</span><span class="w"> </span><span class="mh">0x005193FD</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x005193D2</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">jmpOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">DWORD</span><span class="p">)</span><span class="o">&amp;</span><span class="n">LoadFile</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051940C</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">jmpOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">DWORD</span><span class="p">)</span><span class="o">&amp;</span><span class="n">LoadFile</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051940C</span><span class="p">;</span>
 <span class="w">	</span><span class="c1">//Hook file loader function</span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x00519408</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">jmpOffset</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x00519408</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">jmpOffset</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
 <span class="w">	</span><span class="c1">//Disable CRC checks</span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x0051942D</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00519445</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051942D</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x0051941E</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00519423</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051941E</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x0051AD70</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">retOp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x0051942D</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00519445</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051942D</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NopMemory</span><span class="p">(</span><span class="mh">0x0051941E</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00519423</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mh">0x0051941E</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SetMemory</span><span class="p">(</span><span class="mh">0x0051AD70</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">retOp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
 </pre></div>
 <p>Before actually starting to modifiy the game I decided to write two functions that would help me with the process of patching.
 <code>NopMemory</code> as the name indicates it NOPs(0x90) memory. The first parameter is the starting address and the second is the amount of bytes to patch.
@@ -106,81 +106,81 @@ Using a tools such as <a href="https://github.com/michaellandi/exportstoc">Expor
 <h2>The actual file loading</h2>
 <h3>File name setup</h3>
 <p>The snippet is from <a href="https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L157-L182">here</a>.</p>
-<div class="highlight"><pre><span></span><span class="kr">__declspec</span><span class="p">(</span><span class="kr">naked</span><span class="p">)</span><span class="w"> </span><span class="n">PVOID</span><span class="w"> </span><span class="n">LoadFile</span><span class="p">(</span><span class="n">PkrFile</span><span class="w"> </span><span class="o">*</span><span class="n">pkrFile</span><span class="p">,</span><span class="w"> </span><span class="n">PVOID</span><span class="w"> </span><span class="n">loadBuf</span><span class="p">,</span><span class="w"> </span><span class="n">DWORD</span><span class="w"> </span><span class="n">one</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kr">__declspec</span><span class="p">(</span><span class="kr">naked</span><span class="p">)</span><span class="w"> </span><span class="n">PVOID</span><span class="w"> </span><span class="n">LoadFile</span><span class="p">(</span><span class="n">PkrFile</span><span class="w"> </span><span class="o">*</span><span class="n">pkrFile</span><span class="p">,</span><span class="w"> </span><span class="n">PVOID</span><span class="w"> </span><span class="n">loadBuf</span><span class="p">,</span><span class="w"> </span><span class="n">DWORD</span><span class="w"> </span><span class="n">one</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">	</span><span class="kr">__asm</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">	</span><span class="kr">__asm</span><span class="w"> </span><span class="p">{</span>
 <span class="w">		</span><span class="c1">//get the directory</span>
-<span class="w">		</span><span class="n">mov</span><span class="w"> </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0xA4</span><span class="p">]</span><span class="w"></span>
-<span class="w">		</span><span class="n">mov</span><span class="w"> </span><span class="n">originalDirectory</span><span class="p">,</span><span class="w"> </span><span class="n">eax</span><span class="w"></span>
+<span class="w">		</span><span class="n">mov</span><span class="w"> </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0xA4</span><span class="p">]</span>
+<span class="w">		</span><span class="n">mov</span><span class="w"> </span><span class="n">originalDirectory</span><span class="p">,</span><span class="w"> </span><span class="n">eax</span>
 
 <span class="w">		</span><span class="c1">//Setups the path</span>
-<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">originalDirectory</span><span class="w"></span>
-<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">filePathAdd</span><span class="w"></span>
-<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">mystrcpy</span><span class="w"></span>
-<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"></span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">originalDirectory</span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">filePathAdd</span>
+<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">mystrcpy</span>
+<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span>
 
-<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="mh">0x20</span><span class="w"></span>
-<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span><span class="w"></span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="mh">0x20</span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span>
 <span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="n">eax</span><span class="w"> </span><span class="c1">//Its in eax from strcpy</span>
-<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">strncat</span><span class="w"></span>
-<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="w"> </span><span class="mh">0xC</span><span class="w"></span>
+<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">strncat</span>
+<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="w"> </span><span class="mh">0xC</span>
 
-<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
-<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">LoadStub</span><span class="w"></span>
-<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="mi">4</span><span class="w"></span>
-<span class="w">		</span><span class="n">ret</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">		</span><span class="n">push</span><span class="w"> </span><span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span>
+<span class="w">		</span><span class="n">call</span><span class="w"> </span><span class="n">LoadStub</span>
+<span class="w">		</span><span class="n">add</span><span class="w"> </span><span class="n">esp</span><span class="p">,</span><span class="mi">4</span>
+<span class="w">		</span><span class="n">ret</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 <p>As I said in the beginning, the function can only load a file by knowing its name and the directory it is inside. This means that using some math I can access the other function's stackframe and retrieve this information. After concatenating the directory with the file name it's ready to be loaded.</p>
 <p>Snippet from <a href="https://github.com/krystalgamer/spidey-tools/blob/master/load_from_disk/proxy.c#L107-L152">here</a>.</p>
-<div class="highlight"><pre><span></span><span class="n">PVOID</span><span class="w"> </span><span class="o">*</span><span class="nf">LoadStub</span><span class="p">(</span><span class="n">PkrFile</span><span class="w"> </span><span class="o">*</span><span class="n">pkrFile</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="n">PVOID</span><span class="w"> </span><span class="o">*</span><span class="nf">LoadStub</span><span class="p">(</span><span class="n">PkrFile</span><span class="w"> </span><span class="o">*</span><span class="n">pkrFile</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">	</span><span class="n">HANDLE</span><span class="w"> </span><span class="n">hFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span><span class="w"> </span><span class="n">GENERIC_READ</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">OPEN_EXISTING</span><span class="p">,</span><span class="w"> </span><span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span><span class="w"></span>
-<span class="w">		</span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">HANDLE</span><span class="w"> </span><span class="n">hFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span><span class="w"> </span><span class="n">GENERIC_READ</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">OPEN_EXISTING</span><span class="p">,</span><span class="w"> </span><span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span>
+<span class="w">		</span><span class="nb">NULL</span><span class="p">);</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hFile</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error opening the file&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hFile</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error opening the file&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">fileSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetFileSize</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fileSize</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INVALID_FILE_SIZE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error getting size&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
-<span class="w">	</span><span class="n">pkrFile</span><span class="o">-&gt;</span><span class="n">uncompressedSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fileSize</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">fileSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetFileSize</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fileSize</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INVALID_FILE_SIZE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error getting size&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="n">pkrFile</span><span class="o">-&gt;</span><span class="n">uncompressedSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fileSize</span><span class="p">;</span>
 
-<span class="w">	</span><span class="n">UCHAR</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">fileSize</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">buffer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error creating buffer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">UCHAR</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">fileSize</span><span class="p">);</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">buffer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error creating buffer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">bytesRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ReadFile</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">fileSize</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">bytesRead</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error reading the file&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="n">DWORD</span><span class="w"> </span><span class="n">bytesRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ReadFile</span><span class="p">(</span><span class="n">hFile</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">fileSize</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">bytesRead</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Error reading the file&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bytesRead</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">fileSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">		</span><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Not all bytes were read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
-<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="w">	</span><span class="p">}</span><span class="w"></span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bytesRead</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">fileSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+<span class="w">		</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
+<span class="w">		</span><span class="n">MessageBoxA</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Not all bytes were read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;dammit&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
 
-<span class="w">	</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">	</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
 <span class="w">	</span>
-<span class="w">	</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loaded %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">filePath</span><span class="p">);</span><span class="w"></span>
-<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">buffer</span><span class="p">;</span><span class="w"></span>
+<span class="w">	</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loaded %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">filePath</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">buffer</span><span class="p">;</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 <p>Nothing special about this one, it's a regular file loading routine. Until my latest version it would crash if you modified a file with a bigger one, that was caused due to not modifying the <code>uncompressedSize</code>. After adding the <code>pkrFile-&gt;uncompressedSize = fileSize;</code> line it still didn't work, due to my PKRFile structure being incorrect. Thankfully I was able to fix this easily with the aid of x64dbg.</p>
 <h1>That's all folks!</h1>
@@ -193,7 +193,7 @@ Using a tools such as <a href="https://github.com/michaellandi/exportstoc">Expor
 		</main>
 
 		<footer class="container">
-			© 2022 krystalgamer
+			© 2023 krystalgamer
 		</footer>
 	</body>
 
