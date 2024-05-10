@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Spider-Man (Neversoft) decompilation project Progess Checkpoint - May 2024"
-description: "Documentation of reversal and building of a Marvel's Avenger server emulator"
+title: "Spider-Man (Neversoft) decompilation project Progress Checkpoint - May 2024"
+description: "Progress report for the Spider-Man decompilation project"
 created: 2024-05-09
-modified: 2024-05-09
+modified: 2024-05-10
 tags: [spider-man, decompilation, ida, spider-man 2000]
 comments: false
 ---
@@ -22,7 +22,7 @@ After fixing some issues with my mods and improving the codebase I decided to re
 
 # Restarting the project
 
-Restarting was a no-brainer has I had completly shifted my approach to the project and learned a lot more about it. Even though I knew the game was writen in C++, I had previously decided to use C.
+Restarting was a no-brainer has I had completely shifted my approach to the project and learned a lot more about it. Even though I knew the game was written in C++, I had previously decided to use C.
 I had no strong reason to do so besides the fact I was more comfortable with C. This time I did not make the same mistake.
 
 
@@ -43,7 +43,7 @@ When I say "code massages" they are not limited to changing the code but also th
 Also not having non-matching assembly does not mean the bugs are not preserved as it's more likely a bug in a game is caused by logic rather than a compiler spitting a different instruction.
 
 
-There's no bigger frustation than struggling to get a function to match. When I was decompiling a super-small routine of a PSX game I had the logic pinned down, it was taking parameters and writing to some global variable. My code was doing it but had an extra copy to a register which I was going crazy for. After a while a realized the issue, I had defined the function as returning an `int` if I changed to `void` it would be a perfect match. This to say that there's so many variables at play that getting a matching decompilation is just too much work.
+There's no bigger frustration than struggling to get a function to match. When I was decompiling a super-small routine of a PSX game I had the logic pinned down, it was taking parameters and writing to some global variable. My code was doing it but had an extra copy to a register which I was going crazy for. After a while a realized the issue, I had defined the function as returning an `int` if I changed to `void` it would be a perfect match. This to say that there's so many variables at play that getting a matching decompilation is just too much work.
 
 
 
@@ -120,7 +120,7 @@ Re-written functions:
 - Most of `CItem`
 - Most of `CBody`
 - Most of `CSuper`
-- Geometry Transforamtion engine methods
+- Geometry Transformation engine methods
 - Utility methods
 
 By starting to write code for the "lower" level methods it made me able to identify functions that have been inlined. I've also started to develop this intuition on how the compiler works. For example, when there's a conditional jump, it jumps towards the un-met condition (or as I used to say "jump to further ahead in the source file").
@@ -160,17 +160,17 @@ Has you can see the conditional jump is taken if the argument is zero which is t
 
 Recently to help identify which functions are matching and which need to be revisited I developed a tagging system which is `@Ok`, `@NotOk` and `@TODO`. The idea is to be easily searchable and make it easier to generate high-level status reports.
 
-Finally, I've also made the decompilation setup reproducible which is basically IDA Pro, Ghidra and the same version of Visual Studio by the developers (it was identified using [Detect-It-Easy](https://github.com/horsicq/Detect-It-Easy)). In the beggining I was working on a different machine that for a while didn't have access to.
+Finally, I've also made the decompilation setup reproducible which is basically IDA Pro, Ghidra and the same version of Visual Studio by the developers (it was identified using [Detect-It-Easy](https://github.com/horsicq/Detect-It-Easy)). In the beginning I was working on a different machine that for a while didn't have access to.
 
 
 ## Broadcasting my progress
 
-In late 2023, I've decided to [stream every time I'd work the project](https://www.youtube.com/@kRySt4LGaMeR). The goal was simple to educate people on the complexity of this endeavour. Since I own a Discord community with close to a thousand members, it's not uncommon to get the question - *what % of work is left to do?* - which is quite tricky to answer.
+In late 2023, I've decided to [stream every time I'd work the project](https://www.youtube.com/@kRySt4LGaMeR). The goal was simple to educate people on the complexity of this endeavor. Since I own a Discord community with close to a thousand members, it's not uncommon to get the question - *what % of work is left to do?* - which is quite tricky to answer.
 
 Decompilation process goes as follows. Identify function in code and the data structures it uses. Then, recreate data structures in code and finally recreate the function. It's a lot of work until the code is done. For a lot of streams I was just identifying fields in data structures and naming them if it was possible to infer from the scenario.
 
 
-Livestreaming has also come with the benefit that I can share with the audicience all of the rabbit holes I fall into during the process, such as automation with IDAPython.
+Livestreaming has also come with the benefit that I can share with the audience all of the rabbit holes I fall into during the process, such as automation with IDAPython.
 
 
 ## Focusing on consistency
@@ -193,5 +193,3 @@ There's still aspects that I'd love to improve such as function equality evaluat
 
 
 For the first two instances the idea of dealing with loops makes it daunting and I haven't found a proper way to deal with it. For the third option I have little experience with LLVM so I'm not sure how feasible it is. If someone has any expertise in this topic please reach out to me! My contact information is in the [About page](../about).
-
-
