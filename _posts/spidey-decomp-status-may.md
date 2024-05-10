@@ -8,9 +8,9 @@ tags: [spider-man, decompilation, ida, spider-man 2000]
 comments: false
 ---
 
-In 2019, I started the decompilation the PC version of the Spider-Man game [developed by Neversoft](https://en.wikipedia.org/wiki/Spider-Man_(2000_video_game)), which most is commonly called Spider-Man 2000. Work didn't last long, I made few commits the last being done on 10th of August 2020.
+In 2019, I started the decompilation the PC version of the Spider-Man game [developed by Neversoft](https://en.wikipedia.org/wiki/Spider-Man_(2000_video_game)), which is most commonly called Spider-Man 2000. Work didn't last long, I made few commits the last being done on 10th of August 2020.
 
-Fast-forward to 2023 and my interest in going back to the decompilation had re-ignited, all thanks to a few community members that actively still create mods and explore the game. Here's a non-exhaustive list of the most active ones:
+Fast-forward to 2023 and my interest in going back to the decompilation had re-ignited, all thanks to a few community members that still actively create mods and explore the game. Here's a non-exhaustive list of the most active ones:
 
 
 - [Anganoff](https://www.youtube.com/@Anganoff)
@@ -22,7 +22,7 @@ After fixing some issues with my mods and improving the codebase I decided to re
 
 # Restarting the project
 
-Restarting was a no-brainer has I had completely shifted my approach to the project and learned a lot more about it. Even though I knew the game was written in C++, I had previously decided to use C.
+Restarting was a no-brainer has I had completely shifted my approach to the project and learned a lot more about the game. Even though I knew the game was written in C++, I had previously decided to use C.
 I had no strong reason to do so besides the fact I was more comfortable with C. This time I did not make the same mistake.
 
 
@@ -43,13 +43,13 @@ When I say "code massages" they are not limited to changing the code but also th
 Also not having non-matching assembly does not mean the bugs are not preserved as it's more likely a bug in a game is caused by logic rather than a compiler spitting a different instruction.
 
 
-There's no bigger frustration than struggling to get a function to match. When I was decompiling a super-small routine of a PSX game I had the logic pinned down, it was taking parameters and writing to some global variable. My code was doing it but had an extra copy to a register which I was going crazy for. After a while a realized the issue, I had defined the function as returning an `int` if I changed to `void` it would be a perfect match. This to say that there's so many variables at play that getting a matching decompilation is just too much work.
+There's no bigger frustration than struggling to get a function to match. When I was decompiling a super-small routine of a PlayStation game I had the logic pinned down, it was taking parameters and writing to some global variable. My code was doing it but had an extra copy to a register which I was going crazy for. After a while a realized the issue, I had defined the function as returning an `int` if I changed to `void` it would be a perfect match. This to say that there's so many variables at play that getting a matching decompilation is just too much work.
 
 
 
 ## A proper middle ground
 
-Let's say we're decompiling a function we can either do matching decompilation or equivalent decompilation. The matching process has been described, but how does one evaluate if two pieces of assembly are equivalent. Two factors: sign correctness and memory accesses.
+Let's say we're decompiling a function, we can either do matching decompilation or equivalent decompilation. The matching process has been described, but how does one evaluate if two pieces of assembly are equivalent. Two factors: sign correctness and memory accesses.
 
 Let's assume we're decompiling the following function `void foo(MyStruct *arg)` and there's the following piece of code
 
@@ -106,9 +106,9 @@ Having these concepts laid down I restarted the decompilation project.
 
 The work is publicly accessible on my [GitHub](https://github.com/krystalgamer/spidey-decomp).
 
-The [Macintosh](../spidey-apple) version of the game contains symbols - function names, parameters types and names. This has been used to identify functions of the game, the compiler used for the PC version has quite a few routines that have been inlined which is annoying. A cool thing about this version is that is contains boundaries for the object files. When the code inside `foobar.cpp` starts there will be a dummy section called `.sinit_foobar_cpp` so it has been extremely helpful into getting a proper recreation of the source directory.
+The [Macintosh](../spidey-apple) version of the game contains symbols - function names, parameters types and names. This has been used to identify functions of the game, the compiler used for the PC version has quite a few routines that have been inlined which is annoying. A cool thing about this version is that it contains boundaries for the object files. Where the code inside `foobar.cpp` starts, there will be a dummy section called `.sinit_foobar_cpp` so it has been extremely helpful into getting a proper recreation of the source directory.
 
-The game shares the same engine with Tony Hawk Pro Skater 2 and that game has had 2 demos for the PlayStation that contains symbols - they contain more information than Macintosh version has they also contain classes/structure definitions with offsets. Since both of these games (ab)use inheritance it has been a godsent helping outlining where base class ends and where child class begins. For reference here's the inheritance chart of the player class `CPlayer -> CSuper -> CBody -> CItem (-> CClass)`. `CClass` doesn't seem to be present in the PC and Mac versions, either it was fully inlined or removed when ported.
+The game shares the same engine with Tony Hawk Pro Skater 2 and that game has had 2 demos for the PlayStation that contain symbols - they contain more information than Macintosh version has they also contain classes/structure definitions with offsets. Since both of these games (ab)use inheritance it has been a godsent helping outlining where base class ends and where child class begins. For reference here's the inheritance chart of the player class `CPlayer -> CSuper -> CBody -> CItem (-> CClass)`. `CClass` doesn't seem to be present in the PC and Mac versions, either it was fully inlined or removed when ported.
 
 
 
@@ -177,17 +177,17 @@ Livestreaming has also come with the benefit that I can share with the audience 
 
 As described in this post, decompilation project is tedious and laborious. Therefore it's easy to lose motivation and leave it in backburner for a long-time. The solution I have found is consistency, everyday try to work on it a bit as all effort will compound. An example of this are days where the time I worked on the project was just outlining fields in the classes, there will be a day where I won't need to open the `Structures` tab in IDA and that would mean I have the internal structures all figured out.
 
-I've also worked in removing all the inconveniences that can hinder me working on it, such as the fact I required a specific computer to work on. Now that I have a portable and reproducible environment I have less excuses not to tackle this project. A cool side-effect of working on it regularly is that I feel more motivated, like a self-fulfilling prophecy the more I work the more I feel motivate to do more.
+I've also worked in removing all the inconveniences that can hinder me working on it, such as requiring a specific computer to work on it. Now that I have a portable and reproducible environment I have less excuses not to tackle this project. A cool side-effect of working on it regularly is that I feel more motivated, like a self-fulfilling prophecy the more I work the more motivated I feel.
 
 
-I've talked about this with [MrMartinIden](https://gitlab.com/MrMartinIden) who is also working on decompilation project for [Ultimate Spider-Man PC Version](https://gitlab.com/MrMartinIden/openusm) and we both agree that this type of projects require much more than motivation to thrive.
+I've talked about this with [MrMartinIden](https://www.youtube.com/channel/UCdM-EFz45lu6iDumVFV9Jkg) who is working on decompilation project for [Ultimate Spider-Man PC Version](https://gitlab.com/MrMartinIden/openusm) and we both agree that this type of project requires much more than motivation to thrive.
 
 
 # Looking Forward
 
 
 There's still aspects that I'd love to improve such as function equality evaluation. I'd love to automate the process. Here's possibilities that I've thought so far:
-- x86 symbolic execution engine that would validate whether the same memory accesses
+- x86 symbolic execution engine that would validate memory accesses
 - Lift x86 to a Z3 style theorem and try to see if both sides (original vs re-written) are equal
 - Lift both original and re-written version to LLVM IR and see if they are reduced to same output
 
