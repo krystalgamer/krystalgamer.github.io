@@ -2,8 +2,8 @@
 layout: post
 title: "Spider-Man (Neversoft) decompilation project Progress Checkpoint - July 2024"
 description: "Progress report for the Spider-Man decompilation project - July"
-created: 2024-07-13
-modified: 2024-07-13
+created: 2024-07-27
+modified: 2024-07-29
 tags: [spider-man, decompilation, ida, spider-man 2000]
 comments: false
 ---
@@ -12,7 +12,7 @@ Since my [last post](../spidey-decomp-status-may) I've made quite a bit of progr
 
 # Progress overview
 
-Since May until now more than 500 commits have been pushed to the repository and reached the 700 commit mark. Here's the key metrics:
+Since May more than 500 commits have been pushed to the repository and reached the 700 commit mark. Here's the key metrics:
 
 - @Ok - 507
 - @NotOk - 167
@@ -54,7 +54,7 @@ for (Foo* foo = &foos[0]; foo < &foos[11]; foo++)
 }
 ```
 
-It can be a little jarring at first to deal with this since technically `&foos[11]` is an undefined area. There's a very high chance `&foos[11]` is the address of another global variable that the compiler placed there. Although it might clobber decompiled pseudo-code, is something that becomes second nature after a while. On the other hand, on the PowerPC version the compiler sticks closely to the written code.
+It can be a little jarring at first to deal with this since technically `&foos[11]` is an undefined area. There's a very high chance `&foos[11]` is the address of another global variable that the compiler placed there. Although it might clobber decompiled pseudo-code, it's something that becomes second nature after a while. On the other hand, on the PowerPC version the compiler sticks closely to the written code.
 
 
 Figuring out the multiple linked lists was surprisingly simple. There were logs, such as `DoAssert(dword_XXXXXX == 0, "BaddyList is NULL?");`. Not only it gave me a hint that's a list but that it's most likely a `CBaddy`, nice.
@@ -86,7 +86,7 @@ Will generate the following code:
 ```c
 
 for (unsigned char *ptr = &structs[i].bar;
-	ptr < (&structs + 30 * sizeof(MyStruct));
+	ptr < (&structs + 30 * sizeof(MyStruct) + offsetof(MyStruct.bar));
 	ptr += sizeof(MyStruct))
 {
 	*ptr = 8;
@@ -238,7 +238,7 @@ int contains_substring(const char *hay, const char *needle)
 
 ```
 
-Which implies the characters of `needle` must exist in `hay` sequentially but not a **strict sequence**. I looked at the disassembly and indeed the decompilation was wrong. Two registers got assigned the same variable in the decompilation for some reason.
+Which implies the characters of `needle` must exist in `hay` sequentially but not a **strict sequence**. I looked at the disassembly and indeed the decompilation was wrong. Two registers got aliased to the same variable in the decompilation for some reason.
 
 ## Deoptimizing MSVC
 
@@ -316,7 +316,29 @@ Since the assignment to `bar` happens at the end in both scenarios, the compiler
 These features are great... But they make my code not match the game's code. I believe I have the compiler flags pinned down since I have so many matching functions (Maximum Speed and Consistent Floats). Could these object files been compiled with different flags? I'm doubtful. It's way more likely the developers wrote code in way that prevented the optimization.
 
 
-For the first case, the solution is quite easy. For the first condition write `bar` to a local variable and compare against it and leave the second check as is. The second type of optimization is the trickiest to fool without causing big changes to the output code so I tend not to overthink it. Luckily it hasn't been many the cases where I had to fool the compiler to output less ideal code.
+For the first case, the solution is quite easy. For the first condition write `bar` to a local variable and compare against it and leave the second check as is.
+
+```c
+void my_func()
+{
+	int localBar = this->bar;
+	if (localBar == 1)
+	{
+		/* do something */
+	}
+
+	if (this->bar == -1)
+	{
+		/* do something else */
+	}
+
+}
+```
+
+
+
+
+The second type of optimization is the trickiest to fool without causing big changes to the output code so I tend not to overthink it. Luckily it hasn't been many the cases where I had to fool the compiler to output less ideal code.
 
 # Building on other platforms
 
