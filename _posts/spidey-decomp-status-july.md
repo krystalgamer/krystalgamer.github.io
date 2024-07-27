@@ -3,7 +3,7 @@ layout: post
 title: "Spider-Man (Neversoft) decompilation project Progress Checkpoint - July 2024"
 description: "Progress report for the Spider-Man decompilation project - July"
 created: 2024-07-27
-modified: 2024-07-29
+modified: 2024-07-27
 tags: [spider-man, decompilation, ida, spider-man 2000]
 comments: false
 ---
