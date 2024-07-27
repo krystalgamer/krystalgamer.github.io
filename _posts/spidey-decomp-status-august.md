@@ -20,10 +20,10 @@ Since May until now more than 500 commits have been pushed to the repository and
 - @MEDIUMTODO - 56
 - @SMALLTODO - 50
 
-You might've noticed that I broke down the `TODO` into different categories. The deciding factor for the attributed type  comes from my estimated cognitive load (line count, accessing known globals variables, acccessing unknown global variables, complex arithmetic being performed). This has helped significantly to prioritize my work.
+You might've noticed that I broke down the `TODO` into different categories. The deciding factor for the attributed type  comes from my estimated cognitive load (line count, accessing known globals variables, accessing unknown global variables, complex arithmetic being performed). This has helped significantly to prioritize my work.
 
 
-But how much % of the game is decompiled? Still hard to say. IDA counts ~4000 functions for the Windows version, but a lot of them have been inlined. For the PowerPC version it also counts 4000, but here very little to no inlining happened (I seriously cannot tell if the developers just manually did it) but it also has a bunch of wrappers for WinAPI and DirectX. Once I wrote a script that ignored nullsubs (functions that are just the return statement) and functions that IDA identified as library functions and got ~3000 functions. The issue is that IDA can misidentify user code as library code due to similiraties at assembly level (has happened with my own code) and in this game's case it didn't catch the fact zlib was statically linked.
+But how much % of the game is decompiled? Still hard to say. IDA counts ~4000 functions for the Windows version, but a lot of them have been inlined. For the PowerPC version it also counts 4000, but here very little to no inlining happened (I seriously cannot tell if the developers just manually did it) but it also has a bunch of wrappers for WinAPI and DirectX. Once I wrote a script that ignored nullsubs (functions that are just the return statement) and functions that IDA identified as library functions and got ~3000 functions. The issue is that IDA can misidentify user code as library code due to similarities at assembly level (has happened with my own code) and in this game's case it didn't catch the fact zlib was statically linked.
 
 Taking either those numbers you get a completion of 12% to 16%. My short-term plan to finally have an answer in this regard is to take all the function symbols from the PowerPC version (ignoring the wrapper parts), declare placeholders in code and use the repo tagging system to measure completion.
 
@@ -62,7 +62,7 @@ Figuring out the multiple linked lists was surprisingly simple. There were logs,
 
 # Dealing with shifted pointers
 
-In some instances (such as interating an array of objects) the compiler will pivot the pointer to one of the members. So instead of doing `[eax+0x44]` and `[eax+0x48]`, it'll do `[eax-4]` and `[eax]`.
+In some instances (such as iterating an array of objects) the compiler will pivot the pointer to one of the members. So instead of doing `[eax+0x44]` and `[eax+0x48]`, it'll do `[eax-4]` and `[eax]`.
 
 ```c
 
@@ -108,9 +108,9 @@ for (int i = 0; i<30; i++)
 
 My goal with it was to show that the topics I'm presenting here rarely show in isolation.
 
-The problem with this optimization is that it confuses the decompiler and the pseudo-code generated is terrible to look at. In order to match the accesses I was looking at the assembly and calculating manually which field was being accessed. Doing it a couple times was enough to annoy me and then it dawned on me that I've seen this somewhere. I knew these were called "shifted pointers" so I plug into my search engine `ida pro shifted pointers` and find an appropriatelly named article *Igor’s tip of the week #54: Shifted pointers* - [link](https://hex-rays.com/blog/igors-tip-of-the-week-54-shifted-pointers/).
+The problem with this optimization is that it confuses the decompiler and the pseudo-code generated is terrible to look at. In order to match the accesses I was looking at the assembly and calculating manually which field was being accessed. Doing it a couple times was enough to annoy me and then it dawned on me that I've seen this somewhere. I knew these were called "shifted pointers" so I plug into my search engine `ida pro shifted pointers` and find an appropriately named article *Igor’s tip of the week #54: Shifted pointers* - [link](https://hex-rays.com/blog/igors-tip-of-the-week-54-shifted-pointers/).
 
-Following what the article says you can get the follwoing pseudo-code:
+Following what the article says you can get the following pseudo-code:
 
 ```c
 
@@ -178,7 +178,7 @@ My validator [ensures the bytes](https://github.com/krystalgamer/spidey-decomp/b
 
 # Decompiler and Compiler quirks
 
-Throughout my journey I've came across some odd behaviours from the decompiler (IDA) and the compiler (MSVC) that I thought were important to note but their rarity didn't allow me to fully dig into the details.
+Throughout my journey I've came across some odd behaviors from the decompiler (IDA) and the compiler (MSVC) that I thought were important to note but their rarity didn't allow me to fully dig into the details.
 
 1. IDA is quite good at identifying the usage of comma operator. There was [this function](https://github.com/krystalgamer/spidey-decomp/blob/66e0bb56fa0b5ab98160dfe40e1b817457531836/baddy.cpp#L437-L439) that I was getting extremely close to getting a matching decompilation but there was something that caused my version to be more verbose. Even though IDA's output contained the comma operator, I disregarded it at first because it seemed way too contrived. Turns out it was indeed the way to getting a matching decompilation.
 
@@ -316,7 +316,7 @@ Since the assignment to `bar` happens at the end in both scenarios, the compiler
 These features are great... But they make my code not match the game's code. I believe I have the compiler flags pinned down since I have so many matching functions (Maximum Speed and Consistent Floats). Could these object files been compiled with different flags? I'm doubtful. It's way more likely the developers wrote code in way that prevented the optimization.
 
 
-For the first case, the solution is quite easy. For the first condition write `bar` to a local variable and compare agaisnt it and leave the second check as is. The second type of optimization is the trickiest to fool without causing big changes to the output code so I tend not to overthink it. Luckily it hasn't been many the cases where I had to fool the compiler to output less ideal code.
+For the first case, the solution is quite easy. For the first condition write `bar` to a local variable and compare against it and leave the second check as is. The second type of optimization is the trickiest to fool without causing big changes to the output code so I tend not to overthink it. Luckily it hasn't been many the cases where I had to fool the compiler to output less ideal code.
 
 # Building on other platforms
 
