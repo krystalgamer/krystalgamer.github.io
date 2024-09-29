@@ -4,9 +4,18 @@
     <title>krystalgamer's Blog</title>
     <link rel="alternate" href="https://krystalgamer.github.io/" />
     <link rel="self" href="https://krystalgamer.github.io/feed.xml" />
-    <updated>2024-07-27T16:50:49Z</updated>
+    <updated>2024-09-29T16:20:19Z</updated>
     <author><name>krystalgamer</name></author>
 
+    
+    <entry>
+        <id>https://krystalgamer.github.io/spidey-decomp-status-september/</id>
+        <title>Spider-Man (Neversoft) decompilation project Progress Checkpoint - September 2024</title>
+	<summary>Progress report for the Spider-Man decompilation project - September 2024</summary>
+        <published>2024-09-16T00:00:00Z</published>
+        <updated>2024-07-16T00:00:00Z</updated>
+        <link rel="alternate" href="https://krystalgamer.github.io/spidey-decomp-status-september/" />
+    </entry>
     
     <entry>
         <id>https://krystalgamer.github.io/spidey-decomp-status-july/</id>
