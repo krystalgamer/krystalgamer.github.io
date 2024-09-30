@@ -2,8 +2,8 @@
 layout: post
 title: "Spider-Man (Neversoft) decompilation project Progress Checkpoint - September 2024"
 description: "Progress report for the Spider-Man decompilation project - September 2024"
-created: 2024-09-16
-modified: 2024-07-16
+created: 2024-09-26
+modified: 2024-07-30
 tags: [spider-man, decompilation, ida, spider-man 2000, september]
 comments: false
 ---
@@ -52,7 +52,7 @@ Interestingly, I could not use the Zlib built with the Microsoft's Visual C++ 6 
 Most PKR handling routines present in the executable were part of an external library, which was most likely called `LIBPKR`. This is deduced from the fact the main type exposed is `LIBPKR_HANDLE`. A factor that strongly hints at the routines being external to the game source tree is that their assembly is quite verbose. The function epilogues and prologues are lengthy and take care of the frame pointer. Omitting the frame pointer is one of the first optimizations and one of the simplest way to get easy performance gains (less code, the better).
 The library also includes logic to append files to PKR containers, but its logic is never triggered. Therefore I didn't even attempt to decompile these methods as they bring little to no value to making the game playable.
 
-Armed with the fact there might be a PKR handling library floating around I started to look into other games that use the PKR container - Tony Hawk Pro Skater 2 and Matt Hoffman's Pro BMX - to see if there's more information or accidentally included documentation but no luck. All these games use Neversoft's Big Guns Engine and were ported to PC by LTI Gray Matter. Pro BMX was the only game not developed by Neversoft, but by Shaba Games (the studio that later made Spider-Man: Shattered Dimensions). It seems Activision saw Neversoft's success and started to push its other studios to use the same engine.
+Armed with the fact there might be a PKR handling library floating around I started to look into other games that use the PKR container - Tony Hawk Pro Skater 2 and Matt Hoffman's Pro BMX - to see if there's more information or accidentally included documentation but no luck. All these games use Neversoft's Big Guns Engine and were ported to PC by LTI Gray Matter. Pro BMX was the only game not developed by Neversoft, but by Shaba Games (the studio that later made Spider-Man: Web of Shadows). It seems Activision saw Neversoft's success and started to push its other studios to use the same engine.
 
 Still, it's unclear who developed the PKR format since the format only shows up in the ports and not in the original game. The version I'm decompiling is a port of a port; first it was ported to the Dreamcast by Treyarch (that made all Spider-Man movie tie-in games and Ultimate Spider-Man) and then ported to the PC by LTI Gray Matter. The reason why I don't believe it was Treyarch is that the first Spider-Man movie game was released the very next year and uses a different container format. Although knowing who created the format doesn't help much, having a standalone version could've been useful.
 
