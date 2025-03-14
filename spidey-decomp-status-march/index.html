@@ -1,0 +1,374 @@
+<html>
+
+	<head>
+		<title> Spider-Man (Neversoft) decompilation project Progress Checkpoint - March 2025 </title>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" type="application/atom+xml" href="../feed.xml">
+		<meta name="google-site-verification" content="ye4BoW6jHZeIWnRXX1h5MoijVylcCm19VOLdyoATg64" />
+
+		
+			<meta property="og:title" content=" Spider-Man (Neversoft) decompilation project Progress Checkpoint - March 2025 " />
+			<meta property="og:description" content="Progress report for the Spider-Man decompilation project - March 2025" />
+			<meta property="og:type" content="summary" />
+			<meta name="og:image" content="https://krystalgamer.github.io/static/banner.jpg" />
+
+		
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="../static/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg" style="background-image: url(../static/banner.jpg)">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1 id="post-title">Spider-Man (Neversoft) decompilation project Progress Checkpoint - March 2025</h1></p>
+<p>Shortly after the <a href="../spidey-decomp-status-september">previous progress checkpoint</a>, I took a break and came back in the <a href="https://www.youtube.com/watch?v=E5qEV5CK_9k">middle of February</a>. Nevertheless, progress has been steady and I've learned enough of interesting things that I think are worth sharing.</p>
+<p>As always, you can check the <a href="https://github.com/krystalgamer/spidey-decomp">repository</a> and all progress has been livestreamed on my <a href="https://www.youtube.com/@kRySt4LGaMeR">youtube channel</a>.</p>
+<h1>High level overview</h1>
+<p>Between the previous checkpoint and 14th of March 2025 there have been made 313 commits, totalling 1653.</p>
+<ul>
+<li>@Ok 1306 (+276)</li>
+<li>@NotOk 196 (+9)</li>
+<li>@BIGTODO 55 (-2)</li>
+<li>@MEDIUMTODO 274 (+13)</li>
+<li>@SMALLTODO 206 (-87)</li>
+</ul>
+<p>Recently I've focused more on finishing each source file individually, which is great because during each session there's less context switching. Additionally, the quirky behaviours that I document tend to be localized which I believe is influenced by the engineer that wrote that component.</p>
+<h1>Anatomy of a while-loop</h1>
+<p>Microsoft Visual C++ has this very peculiar way of generating code for <code>while</code> loops, it turns them into a <code>if (cond)</code> and <code>do ... while(cond);</code> combo.</p>
+<p>So, this piece of code:</p>
+<div class="highlight"><pre><span></span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// code</span>
+<span class="p">}</span>
+</pre></div>
+<p>Would become:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">do</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// code</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>Or in x86 assembly:</p>
+<div class="highlight"><pre><span></span><span class="nf">cmp</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span>
+<span class="nf">jnz</span><span class="w"> </span><span class="no">out_of_the_loop</span>
+
+<span class="nl">start_code:</span>
+
+<span class="c1">; code</span>
+
+
+<span class="nf">cmp</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="c1">; same condition as before</span>
+<span class="nf">jz</span><span class="w"> </span><span class="no">start_code</span>
+
+<span class="nl">out_of_the_loop:</span>
+</pre></div>
+<p>This was something that I quickly internalized and didn't give much thought, until I was reversing <code>dcmemcard.cpp</code>. In <code>DCCard_Wait</code> there's this block of code that looked like this:</p>
+<div class="highlight"><pre><span></span><span class="nl">condition:</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">global_variable</span><span class="p">]</span>
+<span class="nf">cmp</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">jz</span><span class="w"> </span><span class="no">condition</span>
+</pre></div>
+<p>How could there be a loop condition that doesn't have the exact same check before the code starts? <code>for</code> loop code generation is basically the same as the one of <code>while</code> loops, so that couldn't be it.</p>
+<p>The following code:</p>
+<div class="highlight"><pre><span></span><span class="c1">// global_variable must be volatile or this will be optimized out</span>
+<span class="c1">// or create an infite loop</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">global_variable</span><span class="p">)</span>
+<span class="w">    </span><span class="p">;</span>
+</pre></div>
+<p>Would generate:</p>
+<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">global_variable</span><span class="p">]</span>
+<span class="nf">cmp</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">jnz</span><span class="w"> </span><span class="no">out_of_condition</span>
+
+
+<span class="nl">condition:</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">global_variable</span><span class="p">]</span>
+<span class="nf">cmp</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">jz</span><span class="w"> </span><span class="no">condition</span>
+
+<span class="nl">out_of_condition:</span>
+</pre></div>
+<p>It was then that it struck me, the code was doing some kind of busy waiting and it's related to Dreamcast memory cards. It was a <code>do...while</code> loop without a body.</p>
+<div class="highlight"><pre><span></span><span class="k">do</span>
+<span class="p">{</span>
+<span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">global_variable</span><span class="p">);</span>
+</pre></div>
+<p><a href="https://github.com/krystalgamer/spidey-decomp/blob/7598bdf8182abb0c7adf94e6d0110639cf32bc90/dcmemcard.cpp#L176-L178">Link</a> to the actual code. LTI Gray Matter, the company that ported the game to PC, must've removed the body of the loop when porting since it no longer served a purpose.</p>
+<h1>Strange inlining in PowerPC version</h1>
+<p>In previous entries of this series I've mentioned how functions in the Windows version have been heavily inlined. On the PowerPC (or Mac) version, inlining seems to be absent. I use the word <em>seems</em> purposefully because I can only recount one instance where I noticed it - the destructor of <code>DCKeyFrame</code>.</p>
+<p>It has the following definition:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="n">DCKeyFrame</span>
+{
+    <span class="n">DCKeyFrame</span> *<span class="n">pNext</span>;
+};
+</pre></div>
+<p>And the destructor is as follows:</p>
+<div class="highlight"><pre><span></span><span class="n">DCKeyFrame</span><span class="o">::~</span><span class="n">DCKeyFrame</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Well, on the PowerPC version it generated some deeply nested code.</p>
+<div class="highlight"><pre><span></span><span class="n">DCKeyFrame</span><span class="o">::~</span><span class="n">DCKeyFrame</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">)</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">)</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="cm">/*</span>
+<span class="cm">                    it continues</span>
+<span class="cm">                */</span>
+<span class="w">                </span><span class="k">delete</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+
+<span class="w">            </span><span class="k">delete</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">delete</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pNext</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<h1>Code Archeology</h1>
+<p>On the other hand, if it wasn't the PowerPC version there would be whole functions and extra-logic that would be gone. Here's a small refresher on how inlining works on MSVC.
+Inlining only works on the same source file, therefore if I want a function to be always inlined I'd have to declare it an a header - <a href="https://github.com/krystalgamer/spidey-decomp/blob/7229bb94db3e39c83b2ed723a5729e623d2963bd/ps2funcs.h#L136-L152">example</a>. The only other exception would be if a function has it is &quot;depth limit&quot; and stopped inlining code.</p>
+<p>Here's an example of logic that would be lost if not for the Mac version. Take a look at <code>OpenMusicFile</code> from <code>PCMusic.cpp</code>:</p>
+<div class="highlight"><pre><span></span><span class="n">INLINE</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="n">OpenMusicFile</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pName</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a2</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">char</span><span class="w"> </span><span class="n">v2</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+
+<span class="w">	</span><span class="n">strcpy</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Voice</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">	</span><span class="n">strcat</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">pName</span><span class="p">);</span>
+<span class="w">	</span><span class="n">DXERR_printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t\t</span><span class="s">MUSIC PLAYING %s</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pName</span><span class="p">);</span>
+
+<span class="w">	</span><span class="n">gMusicFileHandle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gdFsOpen</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">	</span><span class="n">gMusicBinkHandle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BinkOpen</span><span class="p">(</span><span class="n">gMusicFileHandle</span><span class="p">,</span><span class="w"> </span><span class="n">BINKFILEHANDLE</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">BINKIOSIZE</span><span class="p">);</span>
+
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">gMusicBinkHandle</span><span class="p">)</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a2</span><span class="p">)</span>
+<span class="w">		</span><span class="n">BinkSetVideoOnOff</span><span class="p">(</span><span class="n">gMusicBinkHandle</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">	</span><span class="k">else</span>
+<span class="w">		</span><span class="n">BinkSetVideoOnOff</span><span class="p">(</span><span class="n">gMusicBinkHandle</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="p">}</span>
+</pre></div>
+<p>It is only called from one other place: <code>PCMUSIC_Play</code>, and the second argument is <code>true</code>. Therefore the line <code>BinkSetVideoOnOff(gMusicBinkHandle, 1);</code> is gone. </p>
+<p>Even though this is not a common occurrence it tends to show up more in file loading/handling routines and I believe it was developers making the code more flexible but not making use of it. Thankfully, in most instances inlining does not remove code but only binds parameters.</p>
+<div class="highlight"><pre><span></span><span class="n">INLINE</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">CCarnage</span><span class="o">::</span><span class="n">PlayXA</span><span class="p">(</span>
+<span class="w">		</span><span class="n">i32</span><span class="w"> </span><span class="n">a2</span><span class="p">,</span>
+<span class="w">		</span><span class="n">i32</span><span class="w"> </span><span class="n">a3</span><span class="p">,</span>
+<span class="w">		</span><span class="n">i32</span><span class="w"> </span><span class="n">a4</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Rnd</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">a4</span><span class="p">)</span>
+<span class="w">		</span><span class="n">Redbook_XAPlayPos</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="w"> </span><span class="n">a3</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">mPos</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>In this case the inline would work much more like a macro, where it simply replaces all parameters with the passed values.</p>
+<h2>Visual C++ and Link-Time Optimization</h2>
+<p>An interesting tid-bit is that if two functions from different object files have the exact same code, then the linker will only emit only one instance.</p>
+<p>This is the case for <code>MJ_RelocatableModuleClear</code> - <a href="https://github.com/krystalgamer/spidey-decomp/blob/7229bb94db3e39c83b2ed723a5729e623d2963bd/mj.cpp#L22-L34">link</a> - and <code>Submariner_RelocatableModuleClear</code> - <a href="https://github.com/krystalgamer/spidey-decomp/blob/7229bb94db3e39c83b2ed723a5729e623d2963bd/submarin.cpp#L53-L64">link</a>. It's for situtations like this that I'm glad the Mac version preserves all of it as-is.</p>
+<h2>Leftover code?</h2>
+<p>There are also some funny findings, such as in the <code>CGrenadeExplosion</code> constructor where there's a random call <code>Rnd()</code> - <a href="https://github.com/krystalgamer/spidey-decomp/blob/54e4244c5ff5ac624a159c119d5af27ad3a3c9de/exp.cpp#L148">link</a></p>
+<h1>Learnings from a matching decompilation</h1>
+<p>There is nothing more frustating than recreating a function and the assembly is about 99% a close match to the original. Most of them are due to re-ordered memory accesses (functionally the same) which I still don't understand what causes it - classes such as <code>CVector</code> are more subject to this for some unknown reason.</p>
+<p>Code like this:</p>
+<div class="highlight"><pre><span></span><span class="k">this</span><span class="o">-&gt;</span><span class="n">mVec</span><span class="p">.</span><span class="n">vx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="k">this</span><span class="o">-&gt;</span><span class="n">mVec</span><span class="p">.</span><span class="n">vy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+<span class="k">this</span><span class="o">-&gt;</span><span class="n">mVec</span><span class="p">.</span><span class="n">vz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+
+<span class="k">this</span><span class="o">-&gt;</span><span class="n">mField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">99</span><span class="p">;</span>
+</pre></div>
+<p>Would become something like:</p>
+<div class="highlight"><pre><span></span><span class="k">this</span><span class="o">-&gt;</span><span class="n">mVec</span><span class="p">.</span><span class="n">vz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="k">this</span><span class="o">-&gt;</span><span class="n">mVec</span><span class="p">.</span><span class="n">vx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="k">this</span><span class="o">-&gt;</span><span class="n">mField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">99</span><span class="p">;</span>
+
+<span class="k">this</span><span class="o">-&gt;</span><span class="n">mVec</span><span class="p">.</span><span class="n">vy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</pre></div>
+<p>Although ignoring them would be more benefitial to finish the project quicker, this is the type of knowledge that can help other decomp projects and also gives us an insight on how the compiler works. Here's a couple of interesting cases.</p>
+<h2>Swapped registers (ecx &amp; edx)</h2>
+<p>For <code>buAnalyzeBackupFileImage</code> I had written the following code:</p>
+<div class="highlight"><pre><span></span><span class="n">i32</span><span class="w"> </span><span class="nf">buAnalyzeBackupFileImage</span><span class="p">(</span>
+<span class="w">		</span><span class="n">SBackupFile</span><span class="o">*</span><span class="w"> </span><span class="n">a1</span><span class="p">,</span>
+<span class="w">		</span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">a2</span><span class="p">)</span>
+<span class="p">{</span>
+
+<span class="w">	</span><span class="n">i32</span><span class="o">*</span><span class="w"> </span><span class="n">pA2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">i32</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">a2</span><span class="p">);</span>
+<span class="w">	</span><span class="n">i32</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pA2</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+<span class="w">	</span><span class="n">a1</span><span class="o">-&gt;</span><span class="n">mBackupSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span>
+
+<span class="w">	</span><span class="n">a1</span><span class="o">-&gt;</span><span class="n">pCardHead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">SCardHead</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pA2</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>It basically takes data from a buffer <code>a2</code> and populates the <code>SBackupFile</code> structure. The generated code was exactly the same but registers <code>ecx</code> and <code>edx</code> were swapped. Thanks to Mac version I could see that the write to <code>mBackupSize</code> was actually done by <code>memcpy</code>, which is an intrinsic on MSVC!</p>
+<p>By doing the following change:</p>
+<div class="highlight"><pre><span></span><span class="n">i32</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span>
+
+<span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">pA2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+<span class="n">a1</span><span class="o">-&gt;</span><span class="n">mBackupSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span>
+</pre></div>
+<p>It was finally matching! <a href="https://github.com/krystalgamer/spidey-decomp/commit/977f54a2099fefc9d941c3103d84b3e9819539e6">Commit link</a>.</p>
+<h2>Fitting 1 byte into a 4 byte register</h2>
+<p>This one envolves a global variable <code>u8 gObjFileRegion</code> and function call <code>Spool_GetModel(u32 Checksum, i32 Region)</code>. The variable is used by multiple classes during construction and passed as the second argument to the function. As you can see it's an unsigned 1-byte value, therefore it's zero extended when passed.</p>
+<p>For all of its usages this is how the assembly looked like:</p>
+<div class="highlight"><pre><span></span><span class="nf">xor</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">gObjFileRegion</span><span class="p">]</span>
+
+<span class="nf">push</span><span class="w"> </span><span class="mi">0x12345678</span><span class="c1">; first argument is always a constant</span>
+
+<span class="nf">call</span><span class="w"> </span><span class="no">Spool_GetModel</span>
+</pre></div>
+<p>For some reason for the constructor of <code>CSonicBubble</code> it was slightly different.</p>
+<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">gObjFileRegion</span><span class="p">]</span>
+<span class="nf">and</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0xFF</span>
+
+<span class="nf">push</span><span class="w"> </span><span class="mi">0x12345678</span><span class="c1">; first argument is always a constant</span>
+
+<span class="nf">call</span><span class="w"> </span><span class="no">Spool_GetModel</span>
+</pre></div>
+<p>I tried so many different things and eventually gave up. Couple hours later couldn't stop thinking about it, so I decided to check what was so different from other usages to yield a different result. Nothing in the function bodies - they were all <code>Spool_GetModel(0x12345678, gObjFileRegion);</code>. The difference was in the definition, all other places had it <code>extern u8 gObjFileRegion</code>, while for the file of <code>CSonicBubble</code> it was where it was defined! I moved the definition of the variable to another file - <a href="https://github.com/krystalgamer/spidey-decomp/commit/bb82a230f759435dd50f8230f9933d15bf674c58">commit link</a> - and voila! </p>
+<p>From this experience I could deduce that the compiler is quite conservative at generating memory accesses for external variables as it can only know that the variable was <strong>at most</strong> 1 byte long. Where for the file it was declared it knew it had allocated 4 bytes to it (3 of them zeroed), therefore could generate code that is slightly more optimized.</p>
+<h2>The missing exception handler</h2>
+<p>Since early in development the compiler started to generate exception handlers that were matching so I never gave them a deeper thought. Even when I had to write a <a href="https://github.com/krystalgamer/spidey-decomp/blob/bb82a230f759435dd50f8230f9933d15bf674c58/SpideyDX.cpp#L367-L386">SEH handler</a> it was quite simple. It all changed when writing the destructor for <code>DCObject</code>. The PC version had a handler setup that was freeing a field that was already free'd during the destructor. It was super confusing.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DCObject</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">DCObject</span><span class="w"> </span><span class="o">*</span><span class="n">field_E4</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DCObjectList</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">DCObject</span>
+<span class="p">{</span>
+<span class="p">};</span>
+
+<span class="n">DCObject</span><span class="o">::~</span><span class="n">DCObject</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// DCObject::~DCObject(this-&gt;field_E4)</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="p">;</span>
+<span class="w">    </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c1">// DCObjectList::~DCObjectList(this-&gt;field_E4)</span>
+<span class="w">    </span><span class="n">DCObjectList</span><span class="o">*</span><span class="w"> </span><span class="n">pObjList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">DCObjectList</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="p">);</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">pObjList</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">EH_HANDLER</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Before we dig deeper it's really weird that two distinct destructors are called for the same variable. The handler was also doing something that's already done during the destructor which added to the confusion. To better understand what was going on I had to dig deeper into how handlers work, <a href="https://www.openrce.org/articles/full_view/21">this article</a> written by Igorsk was a godsend. The most important part for this is the field <code>nTryBlocks</code> from the <code>FuncInfo</code> structure, as it specificies how many try blocks exist in the function. For this destructor it was set to 0, which made total sense (why would object destruction ever cause an exception) but also added to the confusion. </p>
+<p>A couple of hours later I decided to take another look, this time focusing on other destructors and quickly realized they all had exception handlers that called  the base class destructor. This gave me an idea, if I add a field that's not a pointer and has a non-default destructor will it be added to the exception handler? Yes, it was. Therefore I made appropriate changes to the code.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DCObject</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">DCObjectList</span><span class="w"> </span><span class="n">field_E4</span><span class="p">;</span>
+<span class="p">};</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DCObjectList</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">DCObject</span><span class="w"> </span><span class="o">*</span><span class="n">pObject</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">DCObjectList</span><span class="o">::~</span><span class="n">DCObjectList</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pObject</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">DCObject</span><span class="o">::~</span><span class="n">DCObject</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// DCObject::~DCObject(this-&gt;field_E4)</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="o">-&gt;</span><span class="n">pObject</span><span class="p">;</span>
+<span class="w">    </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="o">-&gt;</span><span class="n">pObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+
+<span class="w">    </span><span class="c1">// DCObjectList::~DCObjectList(&amp;this-&gt;field_E4)</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">field_E4</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Now the code was matching and there was an exception handler that did do <code>delete this-&gt;field_E4;</code>. To be honest there was a small difference, my handler is simply a jump to the destructor while the PC version is fully inlined something that I couldn't make happen, even with <code>forceinline</code>.</p>
+<p>The main reason why this took so long for me to figure out was due to the fact that both classes reference each other. If I had paid closer attention to the Mac version I could've realized earlier that the call was supposed to be <code>DCObjectList::~DCObjectList(&amp;this-&gt;field_E4)</code> and not <code>DCObjectList::~DCObjectList(this-&gt;field_E4)</code> and solved this much earlier.</p>
+<h2>Binary result</h2>
+<p>This is the tale of the function <code>u8 DCCard_Exists(u32)</code>. The function epilogue was as follows:</p>
+<div class="highlight"><pre><span></span><span class="nf">test</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="nf">setz</span><span class="w"> </span><span class="no">al</span>
+<span class="nf">retn</span>
+</pre></div>
+<p>Which IDA translated to:</p>
+<div class="highlight"><pre><span></span><span class="k">return</span><span class="w"> </span><span class="n">var</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+<p>Looks good, but the generated code was strange.</p>
+<div class="highlight"><pre><span></span><span class="nf">xor</span><span class="w"> </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="no">edx</span>
+<span class="nf">test</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="nf">setz</span><span class="w"> </span><span class="no">dl</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">edx</span>
+<span class="nf">retn</span>
+</pre></div>
+<p>For some reason, it was using an extra register, <code>edx</code> to perform the comparison and then copy that value to <code>eax</code>. Tried so many combinations, including the ternary operator and what worked was as follows:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</pre></div>
+<p>My theory on why <code>var == 0</code> yields so much verbose code is because it somehow considers <code>eax</code> as clobbered and therefore must clear the top 24-bits. By explicitly unrolling all possibilities and the compiler knowing <code>eax</code> already has the top 24 bits zeroed, it was able to simplify the code. Here's the <a href="https://github.com/krystalgamer/spidey-decomp/blob/7229bb94db3e39c83b2ed723a5729e623d2963bd/dcmemcard.cpp#L79-L82">code</a> in case you're curious to check it out.</p>
+<h1>Thank you(s)</h1>
+<ul>
+<li>
+<p><a href="https://github.com/krystalgamer/spidey-decomp/commit/b6e49f2274fec7dcb6184e418f0b2cb170340254#diff-eef4fba09c963157c939ecc33e2a2f26b0f39ee8e17b49ce4bcc9da42599525aR83">madebr</a> noticed that I committed a bug to the repository. I had accidentally stubbed out a function by trying to make the code compilable in multiple operating systems, </p>
+</li>
+<li>
+<p>decomp.me Discord server - it's a great place to discuss decompilation projects and get help. Shoutout to <a href="https://github.com/1superchip">Chippy</a> for entertaining my ideas. </p>
+</li>
+<li>
+<p>Igorsk - for the exception handler post and for the help on the Reverse Engineering Discord server.</p>
+</li>
+</ul>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2025 krystalgamer
+		</footer>
+	</body>
+
+</html>
