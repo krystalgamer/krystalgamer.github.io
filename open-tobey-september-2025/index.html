@@ -1,0 +1,189 @@
+<html>
+
+	<head>
+		<title> Spider-Man: The Movie Game dissection project - Introduction </title>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" type="application/atom+xml" href="../feed.xml">
+		<meta name="google-site-verification" content="ye4BoW6jHZeIWnRXX1h5MoijVylcCm19VOLdyoATg64" />
+
+		
+			<meta property="og:title" content=" Spider-Man: The Movie Game dissection project - Introduction " />
+			<meta property="og:description" content="Introducing open-tobey and what it means" />
+			<meta property="og:type" content="summary" />
+			<meta name="og:image" content="https://krystalgamer.github.io/static/banner.jpg" />
+
+		
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="../static/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg" style="background-image: url(../static/banner.jpg)">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1 id="post-title">Spider-Man: The Movie Game dissection project - Introduction</h1></p>
+<p>This post covers my experience of starting a dissection (thin decompilation) project for <em>Spider-Man: The Movie Game</em>, namely the PC Port. It's also meant for anyone that wants to learn the intricacies of decompiling binaries targeting Windows NT, such as identifying the compiler version through the undocumented PE Rich Header and how to manage multiple Visual Studio versions.</p>
+<h1>Context</h1>
+<p>This game is a perfect storm for this type of project.
+Firstly, the Japanese GameCube version has symbols and the source code of <a href="https://github.com/historicalsource/kelly-slaters-pro-surfer/">Kelly Slater's Pro Surfer</a>, which runs on the same engine, has been public for a while. Both of these considerably lower the bar for a decompilation project.</p>
+<p>There's also a set of levels involving Kraven The Hunter that are exclusive to the <a href="https://www.youtube.com/watch?v=tPW8dEStO6U">Xbox version</a>, but the game code for the character exists in all versions.</p>
+<p>Here are the functions on GameCube version:
+<img src="../static/images/open-tobey/kraven-gc.png" alt="Kraven functions in GameCube" /></p>
+<p>Here's the game script code for the PC version:
+<img src="../static/images/open-tobey/kraven-pc.png" alt="Kraven functions in PC" /></p>
+<p>Finally, the PC version has two patches, <a href="https://community.pcgamingwiki.com/files/file/791-spider-man-the-movie-patch-11">1.1</a> and <a href="https://community.pcgamingwiki.com/files/file/791-spider-man-the-movie-patch-13/">1.3</a>. According to online discussions, only the last one is actually usable but it also downgrades a couple features, such as playing as Mary Jane and changing the save file format (previous versions are not compatible). Even with the latest patch the game is buggy on modern systems when playing cutscenes, it'll either crash, play audio with no video, or play inside a tiny square in the middle of your screen.</p>
+<p>Basically, what I'm saying is that there's a lot of things that make this game interesting: it's easier to decompile, there's artificially locked out content and the game still needs fixes.</p>
+<h1>Dissection, not decompilation</h1>
+<p>I want to make this distinction clear. The reason why I call this project a dissection is because I only intend to decompile the game partially, namely the engine. Personally, game logic is not what I'm after therefore I plan to leave that untouched. The goal is to expose core components such as the game's virtual machine, file loading and rendering.</p>
+<p>Ideally, it would look like how Beenox shipped their Spider-Man games, in two modules - <code>GoliathEngine</code> the engine and <code>GameLogic</code> which contains all the game logic.</p>
+<h1>Identifying the compiler through PE's Rich Header</h1>
+<p>Windows Executables aka Portable Executables (PE) contain a secret section between the DOS Header and the PE Header which has been dubbed the <a href="https://github.com/RichHeaderResearch/RichPE">Rich Header</a>. The name comes from the fact it contains the string &quot;Rich&quot;.</p>
+<p>The reason why it's a secret header is because Microsoft never documented it and if you parse a Portable Executable according to the documentation you'd never see it. The DOS Header contains an offset to the PE Header - <code>e_lfanew</code> - which is why the Rich Header can fit between the two.</p>
+<p>In this header you find an array of tuples containing the products used and how many files it interacted with. Here's the header for the game:</p>
+<p><img src="../static/images/open-tobey/tobey-rich.png" alt="Game's Rich Header" /></p>
+<p>As a rule of thumb, the compiler version with highest number of items is the one used by the developer. The reason there's such a variety of versions is because you're linking against libraries (mostly standard ones) that are not necessarily recompiled when the compiler version changes.</p>
+<p>To parse and view the Rich Header I used <a href="https://github.com/horsicq/Detect-It-Easy">Detect It Easy</a>, it's basically a swiss-army knife to get information from binaries. Important to note, don't be fooled by the compiler version it says when you do a scan, because as of version 3.11 it picks the highest version present in the Rich Header which can be wrong.</p>
+<p>From experience, those high versions come from linking against DirectX. It seems internally Microsoft was already dogfooding its next-gen compilers and thus their IDs show in the Rich Header.</p>
+<h2>Finding the proper Visual Studio version</h2>
+<p>The most used developer environment on Windows is Visual Studio and the compiler comes bundled with it. So which version of Visual Studio 6 comes with the C++ compiler version 8943? For that I relied on the help of the user <code>tomsons26</code> from the <a href="https://discord.gg/sutqNShRRs">decomp.me</a> Discord Server. He shared his personal list of product IDs and the matching visual studio version - <a href="https://gist.github.com/krystalgamer/7771c8fcb146509301f5037db1a9f8d0">gist</a>.</p>
+<p>According to the list, version 8943 comes with Visual Studio 6.0 Service Pack 4 + Processor Pack. Finding Visual Studio 6.0 base installation and Service Pack 4 was easy, both are available on the Internet Archive - <a href="https://archive.org/details/X04-14444">here</a> and <a href="https://archive.org/details/X05-86592">here</a>.</p>
+<p>The problem was finding the processor pack. I could only find the one for Service Pack 5 (yes, they're tied to the pack version). The user <code>Mathias</code> from the same discord server pointed me to the <a href="https://web.archive.org/web/20080305030512/http://msdn2.microsoft.com/en-us/vstudio/aa718349.aspx">historical</a> Processor Pack page on the Microsoft's website. There was a note describing how it was originally bundled with the Service Pack 4 CD... and somehow I had missed it. There was an installer inside a directory called <code>PP</code>. Sadly it was the wrong version, 8876 instead of 8943.</p>
+<p>I took another look at the page and indeed it mentioned the <strong>BETA</strong> version bundled with the CD was buggy. I looked into other Service Pack 4 CDs but no luck. I asked on the server and the user <code>pool7</code> did have an Internet Archive <a href="http://web.archive.org/web/20040706010147/http://download.microsoft.com/download/vb60ent/Update/6/W9X2KXP/EN-US/vcpp.exe">link</a>. Later, <code>tomsons26</code> explained that it was distributed digitally which explains why I couldn't find physical copies. I also learned that you can look into the <code>Details</code> tab of <code>C1.DLL</code> and <code>C2.DLL</code> to get the compiler version of the C and C++ compilers respectively, without needing to build.</p>
+<p><img src="../static/images/open-tobey/comp-version.png" alt="Compiler versions" /></p>
+<p>Moral of the story? If you plan to do a decomp join a decomp community. Also I highly recommend a Windows XP virtual machine to install these things and then copy the files over. The installers can be quite finicky.</p>
+<h2>Visual Studio 6.0 version clash</h2>
+<p>The first time I built a project using a different version of Visual Studio 6.0 and checked the executable Rich Header I was confused. It was showing an older version, but I recognized it. It was the same compiler version I use on my other decompilation project - <a href="https://github.com/krystalgamer/spidey-decomp">spidey-decomp</a> and <a href="../spidey-decomp-status-march">latest blog post</a> -, somehow the IDE was picking up the compiler for that toolchain. To validate my theory I used <code>procmon</code>, which lets me monitor system calls across the whole system.</p>
+<p>There was nothing on my environment variables, so I started to look into the registry and that's when I found <code>HKEY_CURRENT_USER\Software\Microsoft\DevStudio\6.0\Build System\Components\Platforms\Win32 (x86)\Directories</code>. The keys <code>Path Dirs</code>, <code>Include Dirs</code> <code>Library Dirs</code> and <code>Source Dirs</code> are the ones influencing this behavior. In the end, I created two <code>reg</code> files with the setup for both projects, which I must run every time I switch. <code>tomsons26</code> also taught me that I can alternatively run <code>VCVARS32.bat</code>, which sets up the developer environment on the terminal, and start <code>MSDEV</code> with the flag <code>/USEENV</code>.</p>
+<h1>First milestone</h1>
+<p>For a proper proof-of-concept I wanted to completely replace a core component of the engine. The target was set to <code>stringx</code>, the custom string implementation of the engine. Copying the code from Kelly Slater's was not enough, I manually checked all of the functions. A great thing about Microsoft's compiler is that the order of the functions in the source file matches the order in the binary.</p>
+<p>Thanks to checking neighbouring functions I found one extra function that seems to only be present in the PC version - <a href="https://github.com/krystalgamer/open-tobey/blob/52c497993329683794cdf5799705c969f385fddf/SpideyTM/SRC/stringx.h#L318-L319">here</a> - and was reassured I didn't miss anything. Also found out that the cache sizes for the strings <a href="https://github.com/krystalgamer/open-tobey/blob/52c497993329683794cdf5799705c969f385fddf/SpideyTM/SRC/stringx.cpp#L30-L37">were different</a>. There were other differences, but they're so minor it'd be quite boring to cover, if you're interested I'd recommend to search for <code>@Patch</code> and read the notes I left.</p>
+<h2>Hooking troubles</h2>
+<p>C++ rules are stricter when it comes to pointers, unlike in C where you can cast everything to <code>void*</code> and be happy. Regular functions can be casted just fine but <strong>member functions</strong> that's where the problem is. This was annoying because I wanted to pass a function pointer of &quot;my&quot; <code>stringx</code> implementation to a function to properly hook into the game. I had the following macro <code>PATCH_PUSH_RET(addr, dest)</code> - <code>addr</code> is the address of the function in the game and <code>dest</code> is the pointer to my implementation - you'd use it as such <code>PATCH_PUSH_RET(0x1234578, stringx::remove_trailing)</code>.
+Initial implementation:</p>
+<div class="highlight"><pre><span></span><span class="cp">#define PATCH_PUSH_RET(addr, dest) {\</span>
+<span class="cp">	unsigned char *tmp = (unsigned char*)(addr);\</span>
+<span class="cp">	tmp[0] = 0x68;\</span>
+<span class="cp">	*(int*)&amp;tmp[1] = dest;\</span>
+<span class="cp">	tmp[5] = 0xC3;\</span>
+<span class="cp">	puts(&quot;Hooking &quot; #dest &quot; at &quot; #addr);\</span>
+<span class="cp">}</span>
+</pre></div>
+<p>The compiler didn't like the member function pointer was treated as something other than a member function pointer. I had dealt with something similar in my other <a href="https://github.com/krystalgamer/spidey-decomp">decomp project</a> so here's the solution:</p>
+<div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="nf">get_thunk_address</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">first</span><span class="p">,...)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="kt">va_list</span><span class="w"> </span><span class="n">args</span><span class="p">;</span>
+<span class="w">	</span><span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="w"> </span><span class="n">first</span><span class="p">);</span>
+
+
+<span class="w">	</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va_arg</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="p">);</span>
+
+<span class="w">	</span><span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="cp">#define PATCH_PUSH_RET(addr, dest) {\</span>
+<span class="cp">	unsigned char *tmp = (unsigned char*)(addr);\</span>
+<span class="cp">	tmp[0] = 0x68;\</span>
+<span class="cp">	*(int**)&amp;tmp[1] = get_thunk_address(0, dest);\</span>
+<span class="cp">	tmp[5] = 0xC3;\</span>
+<span class="cp">	puts(&quot;Hooking &quot; #dest &quot; at &quot; #addr);\</span>
+<span class="cp">}</span>
+</pre></div>
+<p>The trick is to create a variable argument function and yonk the value from the list. It works perfectly and the assembly it generates is quite small (just copying the value of second argument to <code>eax</code>). So even though the code is ugly it's quite elegant.</p>
+<p>My troubles were not over just yet. This didn't work with protected functions or with polymorphic functions. How would the compiler know from <code>stringx::copy</code> that I was referring to <code>stringx::copy(const char*, int)</code> and not <code>stringx::copy(stringx&amp;)</code>?
+The solution was much easier and more convenient than I expected. I export <strong>ALL</strong> of the functions of my project, since it's easier to find them in disassembly and also opens the door for automatically comparing binaries. The solution was to get their address via <code>GetProcAddress</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">extern</span><span class="w"> </span><span class="n">HMODULE</span><span class="w"> </span><span class="n">bink_dll</span><span class="p">;</span><span class="w"> </span><span class="c1">// set on DLL load</span>
+
+<span class="cp">#define PATCH_PUSH_RET_POLY(addr, dest, func_mangled) {\</span>
+<span class="cp">	unsigned char *tmp = (unsigned char*)(addr);\</span>
+<span class="cp">	tmp[0] = 0x68;\</span>
+<span class="cp">	*(int**)&amp;tmp[1] = (int*)GetProcAddress(bink_dll, func_mangled);\</span>
+<span class="cp">	tmp[5] = 0xC3;\</span>
+<span class="cp">	puts(&quot;Hooking &quot; #dest &quot; at &quot; #addr);\</span>
+<span class="cp">}</span>
+</pre></div>
+<p>The parameters had to be changed since now I needed the mangled names - <code>PATCH_PUSH_RET_POLY(0x007D8690, stringx::copy(char const *,int), &quot;?copy@stringx@@QAEXPBDH@Z&quot;)</code>.</p>
+<p>The last challenge was to hook the header defined operator functions that were also marked with <code>inline</code>. </p>
+<div class="highlight"><pre><span></span><span class="k">friend</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">);</span>
+<span class="k">friend</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">);</span>
+<span class="k">friend</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">);</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// removed </span>
+<span class="p">}</span>
+
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// removed </span>
+<span class="p">}</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">)</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// removed</span>
+<span class="p">}</span>
+</pre></div>
+<p>For unknown reasons, they all got materialized in the PC version and I couldn't export them without getting bizarre compilation errors. My solution for this was to define bogus functions that invoke the operators.</p>
+<div class="highlight"><pre><span></span><span class="n">stringx</span><span class="w"> </span><span class="nf">stringx::bogus_sum_sx_sx</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">lhs</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rhs</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">stringx</span><span class="w"> </span><span class="nf">stringx::bogus_sum_ch_sx</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">lhs</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rhs</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">stringx</span><span class="w"> </span><span class="nf">stringx::bogus_sum_sx_ch</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">lhs</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rhs</span><span class="p">;</span>
+
+<span class="p">}</span>
+</pre></div>
+<p>After hooking all functions, it was finally time to check the game, but it crashed...</p>
+<h2>Debugging the crash</h2>
+<p>It was so relieving when I attached <code>x64dbg</code> and the crash was not related to an invalid memory access. The stack pointer was misaligned so when it hit the <code>RET</code> function it was going to the middle of nowhere. By single stepping I was able to figure out the culprit, it was <code>stringx::bogus_sum_sx_ch</code>. The bogus function was clearing the stack when it shouldn't, that's because by default member functions are <code>__thiscall</code> which per the ABI is callee's responsibility to clean the stack. I had forgotten to mark them as <code>static</code> and after that they become <code>__cdecl</code> and the crashes stop :)</p>
+<p><img src="../static/images/open-tobey/it-works.png" alt="it works!" /></p>
+<h1>Closing word</h1>
+<p>If you'd like to contribute or test the project check out the <a href="https://github.com/krystalgamer/open-tobey">repository</a> and if you'd like to see how progress looks like in realtime, I livestream it on <a href="https://www.youtube.com/@kRySt4LGaMeR">YouTube</a>. </p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			© 2025 krystalgamer
+		</footer>
+	</body>
+
+</html>
