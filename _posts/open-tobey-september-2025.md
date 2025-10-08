@@ -91,7 +91,7 @@ Thanks to checking neighbouring functions I found one extra function that seems 
 
 ## Hooking troubles
 
-C++ rules are stricter when it comes to pointers, unlike in C where you can cast everything to `void*` and be happy. Regular functions can be casted just fine but **member functions** that's where the problem is. This was annoying because I wanted to pass a function pointer of "my" `stringx` implementation to a function to properly hook into the game. I had the following macro `PATCH_PUSH_RET(addr, dest)` - `addr` is the address of the function in the game and `dest` is the pointer to my implementation - you'd use it as such `PATCH_PUSH_RET(0x1234578, stringx::remove_trailing)`.
+C++ rules are stricter when it comes to pointers, unlike in C where you can cast everything to `void*` and be happy. Regular functions can be casted just fine but **member functions** that's where the problem is. This was annoying because I wanted to pass a function pointer of "my" `stringx` implementation to a function to properly hook into the game. I had the following macro `PATCH_PUSH_RET(addr, dest)` - `addr` is the address of the function in the game and `dest` is the pointer to my implementation - you'd use it as such `PATCH_PUSH_RET(0x12345678, stringx::remove_trailing)`.
 Initial implementation:
 
 
@@ -210,7 +210,7 @@ After hooking all functions, it was finally time to check the game, but it crash
 
 ## Debugging the crash
 
-It was so relieving when I attached `x64dbg` and the crash was not related to an invalid memory access. The stack pointer was misaligned so when it hit the `RET` function it was going to the middle of nowhere. By single stepping I was able to figure out the culprit, it was `stringx::bogus_sum_sx_ch`. The bogus function was clearing the stack when it shouldn't, that's because by default member functions are `__thiscall` which per the ABI is callee's responsibility to clean the stack. I had forgotten to mark them as `static` and after that they become `__cdecl` and the crashes stop :)
+It was so relieving when I attached `x64dbg` and the crash was not related to an invalid memory access. The stack pointer was misaligned so when it hit the `RET` instruction it was going to the middle of nowhere. By single stepping I was able to figure out the culprit, it was `stringx::bogus_sum_sx_ch`. The bogus function was clearing the stack when it shouldn't, that's because by default member functions are `__thiscall` which per the ABI is callee's responsibility to clean the stack. I had forgotten to mark them as `static` and after that they become `__cdecl` and the crashes stop :)
 
 
 ![it works!](images/open-tobey/it-works.png)
