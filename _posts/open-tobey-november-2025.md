@@ -1,0 +1,336 @@
+---
+layout: post
+title: "Spider-Man: The Movie Game dissection project Checkpoint - November 2025"
+description: "Introducing open-tobey and what it means"
+created: 2025-11-09
+modified: 2025-11-10
+tags: [spider-man, tobey, open-tobey, decompilation, ida]
+comments: false
+---
+
+In the last [post](../open-tobey-september-2025), I introduced the project. Since then, more than 300 commits have been made to the project and 3 releases have been published. In this post, I'll provide a small status update and share some interesting decompilation tidbits. 
+
+# Current status
+
+First of all, if you're interested in seeing me work, I livestreamed all of this on my [YouTube channel](https://www.youtube.com/@kRySt4LGaMeR).
+
+Here are all of the finished components so far:
+
+- os_file
+- vm_stack
+- vm_symbol
+- vm_thread
+- vm_executable
+- so_data_block
+- ini_parser
+- os_developer_options
+- pstring
+- script_object
+- script_object::instance
+- error_context
+- signal
+- gated_signal
+- signaller
+- signal_callback
+- script_callback
+- code_callback
+- signal_manager
+- script_manager
+- slc_manager
+- filespec
+- script_library_class
+- script_library_class::function
+- slc_script_object_t
+- slc_num_t
+- slc_str_t
+
+Here's the ones I started and haven't finished:
+
+- hires_clock
+- text_file
+- region
+
+You can download it [here](https://github.com/krystalgamer/open-tobey/releases/tag/v4). Please report any bugs that you find!
+
+# Exchanging pointers
+
+The game and the DLL I'm injecting have different heaps. Only the owner of the heap can manage that memory; therefore, if I try to free a pointer allocated by the game I'll definitely crash. The solution is to make sure all memory management goes through the same heap. 
+Luckily, Treyarch did global overrides for `new` and `delete` to call `malloc` and `free` so I only had to hook these.
+
+I boot the game to test the change and... it crashes shortly after.
+Turns out there's more than these two that affect the heap. Surprisingly `atexit` also affects the heap so I hooked it too and... the game now works! Here's the [link](https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/SpideyTM/SRC/HWOSPC/w32_archalloc.cpp#L100-L106) to the code. The user `tomsons26` from the decomp.me Discord server suggested to also hook [msize](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/msize?view=msvc-170), since there are functions that cause memory allocations and they rely on it.
+
+
+Slightly unrelated but this affected my original texture loader for Neversoft's Spider-Man and it took so long to debug. In that case I did the opposite and called the game's `new`/`delete` operators - [link](https://github.com/krystalgamer/spidey-tools/blob/44a5a965bd29276cffe22bdf6c2c41698594426b/texture_loader/patches.c#L280-L283)
+
+
+# Different build options
+
+When I started this project I thought Treyarch used the default *Maximize Speed* option, but they made some very peculiar changes.
+
+## Incremental linking
+
+This game was built with incremental linking, which is meant to speed-up development but there's no reason to keep it enabled for the final release build. The main idea behind it is to generate an executable in a flexible way that can be easily extended thus reducing the linking time. In the case of MSVC, for each function, it generates a forwarder function whose sole purpose is to call the target function. In case there's changes to the target function the forwarder only needs to update the offset. The issue of having this in a release build is that it will hurt performance, since for every function call we're making two.
+
+
+This gets worse, once you consider my hooks. They overwrite the prologue of the target function with a jump to my code. This means for hooked code there's two layers of indirection, totalling in three calls per function call. Even though the game runs fine with this level of indirection, I was not okay with it.
+
+So I started to work on an optimizer. The forwarder functions are all at the top of the `.text` section and have the same format.
+
+```asm
+jmp target ;this is a relative offset
+```
+
+All my hooks also have the same format.
+
+
+```asm
+push target ;this is a absolute address
+ret
+```
+
+
+Combining these two ideas, the optimizer was very easy to implement. First, start at the beginning of the `.text` and while there's a `jmp` keep going. If the memory at the target is a `push... ret` then adjust the offset of the `jmp`, else ignore it. The code for it can be seen [here](https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/dllmain.cpp#L232-L269).
+Even though this helps reduce the indirection, there's still one indirection level. I plan to address this in the future. For now I'm content that my hooks don't make it worse.
+
+## No exception handling
+
+There was a function that I was decompiling that was getting an autogenerated exception handler added. This is not uncommon, because MSVC will implicitly add them for functions that use `new`. Disabling exception handling did make the target assembly match, but I was unsure if there weren't other factors at play. So I searched the whole binary for `mov eax, large fs:0`, this is the assembly snippet that sets up the SEH frame. All the matches were coming from CRT functions, none from the game. This reassured me that the  game was built without exception handling.
+
+
+
+# Different STL
+
+The STL is heavily used in this game, especially `vector` and `list` containers. When operating with these containers the generated code and object size I was getting were very different. That's because their implementation was indeed different. It's using the Silicon Graphics STL also known as SGISTL which is available [here](https://sgistl.github.io). Replacing the default one was surprisingly easy, just make sure in the include order it comes first and voila. Now the object size was matching but the code gen not so much.
+
+Any operation that changes the size of the container, i.e adding or removing elements, had slightly different code.
+That's because Treyarch removed the thread-safety and made some other minor tweaks. I ended up keeping the SGISTL as-is because it was not worth the effort. At the end of the day what matters is that the underlying data structures match.
+
+
+
+# Singletons
+
+Treyarch makes heavy use of singletons, all of them inherit from the same base class `singleton`. The class also comes with some handy macros that implement all the needed functions to create, destroy and acquire the singleton. To interface with it you simply call the static function `inst()` which returns a pointer, e.g `file_manager::inst()->load_file("my_file.bin")`.
+
+This makes decompiling these classes easier, because there will always be a `create_inst` that exposes the size and also the constructor. Referencing the game's singleton objects is also easy, I just replace the `inst()` implementation in my project:
+
+
+```c++
+public:
+  static inline entity_manager* inst()
+  {
+
+	  // @Hardcode
+	  return *reinterpret_cast<entity_manager**>(0x00910DC0);
+  }
+```
+
+When all references to it are replaced I can simply replace it with my own, but since we're dealing with pointers there's no reason to do so. Compared to Neversoft's Spider-Man where a lot of things live in global memory, dealing with just pointers is a blessing.
+
+
+
+# Custom _ftol
+
+Floating point functions give me nightmares, they're so sensitive that any small change can have drastic effects. I tend to avoid them if possible. There was this very simple function:
+
+```c++
+void hires_clock_t::wait_for(float t)
+
+{
+	Sleep(t);
+}
+```
+
+If you're familiar with Win32 API you know that `Sleep` takes a `DWORD`, so the compiler introduces an implicit conversion. It'd look like:
+
+```c++
+void hires_clock_t::wait_for(float t)
+
+{
+	Sleep(_ftol(t));
+}
+```
+
+Float-To-Long is the full name of the function that performs the conversion. Depending on your compiler settings it might not be emitted, but since precision is the default for MSVC it'll be there. The decompilation of `wait_for` was fine, the problem was `_ftol`. They were completely different. I spent hours playing around with compiler settings and type casting but it didn't help. I did find a very old StackOverflow post - [link](https://stackoverflow.com/questions/20431671/porting-old-compiler-ftol-float-to-long-function-to-c) - where the poster was replicating the behaviour of an old program and getting different results on the floating point conversions. Could be an OG decomper :)
+
+The assembly snippet in the post was very similar and it even had a link to `SDL_stdlib.c` which had a slightly more verbose version of the game's `_ftol`. Out of ideas I posted on the decomp.me Discord Server. Once again `tomsons26` solved this mystery for me. It's a `_ftol` implementation from newer Visual Studio editions that had been backported and optimized by Treyarch. To replace the one used by the compiler you just have to declare a `__declspec(naked) void __ftol()` and it'll use that.  He also taught me something very interesting. Since the code in the binary is mixed with other game code then it was implemented through inline assembly, if it had been closer to library code it'd been linked from an external object.
+
+Here's how it looks like in my project - [link](https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/dllmain.cpp#L21-L66). By the way, I love that in typical StackOverflow fashion the first comment to the question was asking the OP why he wanted matching behaviour.
+
+
+# Size of bool
+
+Common knowledge says that a `bool` is backed by an `unsigned char`/`char` which is 8 bits and the generated code also makes use of 8-bit registers. Here's an example:
+
+```c
+bool my_func()
+{
+    return true;
+}
+```
+
+Would generate the following assembly:
+
+```asm
+mov al, 1
+ret
+```
+
+Similar thing would happen for functions that call `my_func()`.
+
+```c
+
+if (my_func())
+{
+    // something happens here
+}
+```
+
+Would generate:
+
+```asm
+call my_func
+test al, al
+```
+
+
+But there's some instances where it doesn't hold true. Take for example this function:
+
+
+```c++
+bool link_interface::is_a_parent(bone *pBone)
+{
+	return (this->my_parent)
+		&& (this->my_parent == pBone
+				|| this->my_parent->has_link_ifc() &&
+                (this->my_parent->link_ifc()->is_a_parent(pBone)));
+
+}
+```
+
+First, let's disregard the whole `link_ifc` stuff, it's Treyarch take on abstract interfaces and on itself could warrant a whole section. This function returns a `bool`, but its epilogue writes to a 32-bit register.
+
+```asm
+mov eax, 1
+ret
+
+xor eax, eax
+ret
+```
+
+My first instinct was to replace the return type with `int` but all calling functions were operating on 8-bit registers. Not sure if you noticed, but it's a recursive function which makes it more confusing. Why write the result to 32-bit register if when it calls itself it only checks 8 bits?
+
+The odd way it's written is why it happens. At first I had the conditions broken into multiple if-else statements and prologue was using 8-bit registers as expected. Concatenating all of them into a single expression causes MSVC to generate different assembly for some reason.
+
+
+On the other hand, the way you compare with a `bool` also affects code generation, but this time it's deterministic.
+
+
+- `if (my_bool)` would generate `test al, al`
+- `if (my_bool == true)` would generate `cmp al, 1`
+
+This is pure speculation, but I believe the reason is due to truthiness. Truthiness is a concept that explains how non-boolean types are evaluated in boolean contexts. For integers any value that's not zero is true. In Python, an empty list evaluates to `False`.
+
+If `bool` is not a first-order concept to the compiler then it'll be implemented being backed by an `int` or `char` which share the same truthiness. That's why the two statements above generate different code. First one is checking for truthiness while the second is explicitly comparing to `true` which is often defined as one.
+
+
+# Debugging horror stories
+
+Even though the progress has been steady, sometimes I manage to find myself with a bug that stumps me. Here's a couple that made me facepalm.
+
+
+## Hooking function causes infinite loop
+
+I just finished decompiling a couple functions and now it was time to validate. I boot the game and it hangs. Through trial and error I find the hook that was causing it. In the debugger, I step into the function and I'm extremely confused. The code was as such:
+
+```asm
+mov eax, [ecx]
+jmp [eax+OFFSET]
+```
+
+It was jumping to itself and even more confusing I knew the function wasn't recursive. Why was my hook going into here? I even opened my DLL in the disassembler to see if it wasn't a hallucination. Turns out this was very simple and I even had written about this in a [previous post](../spidey-decomp-status-july). When referencing a `virtual` function through a pointer, it will point to a stub that resolves the function through the virtual table, as seen in the assembly snippet.
+I was hooking the function like so `PATCH_PUSH_RET(0x004A09D0, signaller::raise_signal);` which made that function point to the stub and cause the infinite loop. 
+
+The solution was to use the export based approach `PATCH_PUSH_RET_POLY(0x004A09D0, signaller::raise_signal, "?raise_signal@signaller@@UAEXI@Z");` that makes use of dynamic symbol resolution to get the address.
+I knew about this, I had written about it and still managed to get stuck with a simple bug. Moral of the story, always hook virtual functions through the exports **NEVER** through function pointers.
+
+I had fixed it, but now I had a question - why does MSVC generate these stubs for virtual functions? I posted on the decomp.me Discord server and the user `Ethanol` quickly replied that it was for the inherited classes properly resolve the function. Of course! The tunnel vision was so strong here, that I got stuck debugging a simple issue and couldn't reason through it.
+
+
+# Sneaky inline
+
+There's this very handy class in the game called `errorcontext`. It's a manual trace that exposes two functions `push_context(const stringx&)` and `pop_context()`. In case of error you can call `get_context()` to get a trace of contexts in the following format: `[context1]->[context2]->[context3]`. Basically a manual stack trace.
+
+There's also a handy OOP wrapper called `ectx`. On the constructor it calls `push_context()` and the destructor calls `pop_context()`.
+
+I had finished decompiling both classes and went to validate. The game was crashing inside of `stringx` code which made it even more confusing. By commenting the hooks one by one I figured out the root cause was `push_context()`. Weirdly enough it only caused problems when explicitly hooked. When called through `ectx` it was working perfectly fine. The code for it was also stupidly simple:
+
+```c++
+void error_context::push_context( const stringx & context ) 
+{ 
+	assert( context_stack.size() < ECTX_STACK_SIZE );
+	context_stack.push_back(context);
+}
+```
+
+`context_stack` is a `vector<stringx>`, so each push calls the copy constructor and that's where it was crashing. The failure was an invalid memory access and the address wasn't obviously wrong like a null pointer. Instrumenting the function didn't work either, it only made the code crash before reaching `push_back` - i.e tried to log the trace by calling `get_context()` but it'd crash.
+
+The function was very cursed so I decided to step away from the computer and do some chores. As soon as I was about to leave home, it struck me. What if my code is correct but I'm hooking the wrong thing? Something I had omitted so far is that `push_back` is inlined, so the function is not just a simple `jmp` or `call`. By carefully inspecting both mine and the game's code it jumped out to me, there was a constant four byte offset. I was tricked by what was actually inlined. Let me explain, functions defined in header files tend to be inlined by MSVC, that's why `push_back` was inlined. This was also the case for `push_context`, this meant that when you wrote code such as:
+
+```c++
+
+void my_func()
+{
+    error_context::inst()->push_context("my_func");
+}
+```
+
+It was actually doing:
+
+```c++
+void my_func()
+{
+    vector::push_back(error_context::inst()->context_stack, "my_func");
+}
+```
+
+That's why there was a four byte offset, `context_stack` is located at offset 4 of the class. In the end, the solution was pretty simple:
+
+```
+void __fastcall offseted_push_context(error_context* this_ptr, int, const stringx& context)
+{
+    error_context *fixed = reinterpret_cast<error_context*>(reinterpret_cast<int>(this_ptr) - 4);
+
+    fixed->push_context(context);
+}
+```
+
+Manually fix the `this` pointer and call my `push_context`.
+
+# Improvements to the workflow
+
+I'm really proud of my validation framework. It supports both compile time and runtime assertions. The former is great when I have a class fully decompiled and I want to freeze it, while the latter is much more convenient for components actively being decompiled. The biggest advantage of runtime assertions is that they can provide useful error messages while compile time ones can only break build. Because of this I still prefer runtime assertions.
+
+The problem with runtime assertions is that I'm building a proxy DLL, so for each build I need to copy the DLL and run the game. This got annoying really quick. I only needed something to run my DLL, write any error messages to `stdout` and exit with the appropriate exit code so that it can be scriptable and used in CI. At that time, my DLL did everything on `DllMain`, this included patching the game.
+Any executable that wasn't the game that tried to load it would most likely crash or suffer from memory corruption. The solution was to check on load if I'm in the game's executable; if so do the usual, else do nothing. Also exported the `runtime_assertions` function so that the program that loads it can call it explicitly.
+
+Next challenge was the runner. Windows does have `rundll`, but I had to use a specific calling convention and it looked too hacky. So I opted to build my own tiny `rundll` just for this project. The first prototype used Python's `ctypes`, but it didn't work. Python was a 64-bit executable while the DLL was 32-bit, there's no easy way for them to interface. I had to explicitly build a 32-bit executable for this. Here's the [final product](https://github.com/krystalgamer/tobey-validator/blob/master/tobey_validator.cpp) which I called `tobey_validator`. It simply loads a DLL, tries to resolve the function `runtime_assertions` and if it succeeds calls it and exits with the code returned by the function.
+
+Now I can run the validation from the terminal and also in CI - [link](https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/.github/workflows/c-cpp.yml#L40-L42).
+
+## PANIC
+
+A macro that will halt the execution of the program and write to debug log the name of the file and line. Did you know VC++6 doesn't support `__FUNCTION__`?
+It's useful when I'm making changes and I want to safeguard myself. It's also useful to mark functions that I haven't decompiled but might be called.
+
+
+
+
+
+# Closing words
+
+This project has been coming along very nicely. The approach of hooking the game is so pleasant that I'm thinking about bringing it to my other decompilation project. The issue with that game is that it relies too much on global variables, which makes it quite finicky to work with (maybe linker scripts can help?). 
+
+Once again, I need to thank the decomp.me Discord community for helping me so much with the problems I stumble upon. Progress wouldn't be as quick without them.
+
+Finally, I livestream my progress on my [YouTube channel](https://www.youtube.com/@kRySt4LGaMeR) and if you're interested in contributing please check out the [repository](https://github.com/krystalgamer/open-tobey/).
