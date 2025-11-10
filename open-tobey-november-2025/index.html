@@ -1,0 +1,262 @@
+<html>
+
+	<head>
+		<title> Spider-Man: The Movie Game dissection project Checkpoint - November 2025 </title>
+		
+	<link rel="stylesheet" href="../static/borland.css">
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+		<link rel="stylesheet" href="../static/styles.css" >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" type="application/atom+xml" href="../feed.xml">
+		<meta name="google-site-verification" content="ye4BoW6jHZeIWnRXX1h5MoijVylcCm19VOLdyoATg64" />
+
+		
+			<meta property="og:title" content=" Spider-Man: The Movie Game dissection project Checkpoint - November 2025 " />
+			<meta property="og:description" content="Introducing open-tobey and what it means" />
+			<meta property="og:type" content="summary" />
+			<meta name="og:image" content="https://krystalgamer.github.io/static/banner.jpg" />
+
+		
+	</head>
+
+
+	<body>
+
+		<header>
+			<div class="nav-holder">
+				<nav class="container">
+				<div class="logo-name">
+					<img class="logo" src="../static/logo.png" alt="krystalgamer's Lair">
+					<a href="../index.html">krystalgamer's Lair</a>
+				</div>
+				<a href="../about/index.html">About</a>
+				</nav>
+			</div>
+
+
+			<div class="header-bg" style="background-image: url(../static/banner.jpg)">
+			
+				<h1>
+					krystalgamer - Blog
+				</h1>
+
+			</div>
+		</header>
+		<main class="container dope-shadow">
+
+			
+	<div class="post-holder">
+		<p><h1 id="post-title">Spider-Man: The Movie Game dissection project Checkpoint - November 2025</h1></p>
+<p>In the last <a href="../open-tobey-september-2025">post</a>, I introduced the project. Since then, more than 300 commits have been made to the project and 3 releases have been published. In this post, I'll provide a small status update and share some interesting decompilation tidbits. </p>
+<h1>Current status</h1>
+<p>First of all, if you're interested in seeing me work, I livestreamed all of this on my <a href="https://www.youtube.com/@kRySt4LGaMeR">YouTube channel</a>.</p>
+<p>Here are all of the finished components so far:</p>
+<ul>
+<li>os_file</li>
+<li>vm_stack</li>
+<li>vm_symbol</li>
+<li>vm_thread</li>
+<li>vm_executable</li>
+<li>so_data_block</li>
+<li>ini_parser</li>
+<li>os_developer_options</li>
+<li>pstring</li>
+<li>script_object</li>
+<li>script_object::instance</li>
+<li>error_context</li>
+<li>signal</li>
+<li>gated_signal</li>
+<li>signaller</li>
+<li>signal_callback</li>
+<li>script_callback</li>
+<li>code_callback</li>
+<li>signal_manager</li>
+<li>script_manager</li>
+<li>slc_manager</li>
+<li>filespec</li>
+<li>script_library_class</li>
+<li>script_library_class::function</li>
+<li>slc_script_object_t</li>
+<li>slc_num_t</li>
+<li>slc_str_t</li>
+</ul>
+<p>Here's the ones I started and haven't finished:</p>
+<ul>
+<li>hires_clock</li>
+<li>text_file</li>
+<li>region</li>
+</ul>
+<p>You can download it <a href="https://github.com/krystalgamer/open-tobey/releases/tag/v4">here</a>. Please report any bugs that you find!</p>
+<h1>Exchanging pointers</h1>
+<p>The game and the DLL I'm injecting have different heaps. Only the owner of the heap can manage that memory; therefore, if I try to free a pointer allocated by the game I'll definitely crash. The solution is to make sure all memory management goes through the same heap.
+Luckily, Treyarch did global overrides for <code>new</code> and <code>delete</code> to call <code>malloc</code> and <code>free</code> so I only had to hook these.</p>
+<p>I boot the game to test the change and... it crashes shortly after.
+Turns out there's more than these two that affect the heap. Surprisingly <code>atexit</code> also affects the heap so I hooked it too and... the game now works! Here's the <a href="https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/SpideyTM/SRC/HWOSPC/w32_archalloc.cpp#L100-L106">link</a> to the code. The user <code>tomsons26</code> from the decomp.me Discord server suggested to also hook <a href="https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/msize?view=msvc-170">msize</a>, since there are functions that cause memory allocations and they rely on it.</p>
+<p>Slightly unrelated but this affected my original texture loader for Neversoft's Spider-Man and it took so long to debug. In that case I did the opposite and called the game's <code>new</code>/<code>delete</code> operators - <a href="https://github.com/krystalgamer/spidey-tools/blob/44a5a965bd29276cffe22bdf6c2c41698594426b/texture_loader/patches.c#L280-L283">link</a></p>
+<h1>Different build options</h1>
+<p>When I started this project I thought Treyarch used the default <em>Maximize Speed</em> option, but they made some very peculiar changes.</p>
+<h2>Incremental linking</h2>
+<p>This game was built with incremental linking, which is meant to speed-up development but there's no reason to keep it enabled for the final release build. The main idea behind it is to generate an executable in a flexible way that can be easily extended thus reducing the linking time. In the case of MSVC, for each function, it generates a forwarder function whose sole purpose is to call the target function. In case there's changes to the target function the forwarder only needs to update the offset. The issue of having this in a release build is that it will hurt performance, since for every function call we're making two.</p>
+<p>This gets worse, once you consider my hooks. They overwrite the prologue of the target function with a jump to my code. This means for hooked code there's two layers of indirection, totalling in three calls per function call. Even though the game runs fine with this level of indirection, I was not okay with it.</p>
+<p>So I started to work on an optimizer. The forwarder functions are all at the top of the <code>.text</code> section and have the same format.</p>
+<div class="highlight"><pre><span></span><span class="nf">jmp</span><span class="w"> </span><span class="no">target</span><span class="w"> </span><span class="c1">;this is a relative offset</span>
+</pre></div>
+<p>All my hooks also have the same format.</p>
+<div class="highlight"><pre><span></span><span class="nf">push</span><span class="w"> </span><span class="no">target</span><span class="w"> </span><span class="c1">;this is a absolute address</span>
+<span class="nf">ret</span>
+</pre></div>
+<p>Combining these two ideas, the optimizer was very easy to implement. First, start at the beginning of the <code>.text</code> and while there's a <code>jmp</code> keep going. If the memory at the target is a <code>push... ret</code> then adjust the offset of the <code>jmp</code>, else ignore it. The code for it can be seen <a href="https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/dllmain.cpp#L232-L269">here</a>.
+Even though this helps reduce the indirection, there's still one indirection level. I plan to address this in the future. For now I'm content that my hooks don't make it worse.</p>
+<h2>No exception handling</h2>
+<p>There was a function that I was decompiling that was getting an autogenerated exception handler added. This is not uncommon, because MSVC will implicitly add them for functions that use <code>new</code>. Disabling exception handling did make the target assembly match, but I was unsure if there weren't other factors at play. So I searched the whole binary for <code>mov eax, large fs:0</code>, this is the assembly snippet that sets up the SEH frame. All the matches were coming from CRT functions, none from the game. This reassured me that the  game was built without exception handling.</p>
+<h1>Different STL</h1>
+<p>The STL is heavily used in this game, especially <code>vector</code> and <code>list</code> containers. When operating with these containers the generated code and object size I was getting were very different. That's because their implementation was indeed different. It's using the Silicon Graphics STL also known as SGISTL which is available <a href="https://sgistl.github.io">here</a>. Replacing the default one was surprisingly easy, just make sure in the include order it comes first and voila. Now the object size was matching but the code gen not so much.</p>
+<p>Any operation that changes the size of the container, i.e adding or removing elements, had slightly different code.
+That's because Treyarch removed the thread-safety and made some other minor tweaks. I ended up keeping the SGISTL as-is because it was not worth the effort. At the end of the day what matters is that the underlying data structures match.</p>
+<h1>Singletons</h1>
+<p>Treyarch makes heavy use of singletons, all of them inherit from the same base class <code>singleton</code>. The class also comes with some handy macros that implement all the needed functions to create, destroy and acquire the singleton. To interface with it you simply call the static function <code>inst()</code> which returns a pointer, e.g <code>file_manager::inst()-&gt;load_file(&quot;my_file.bin&quot;)</code>.</p>
+<p>This makes decompiling these classes easier, because there will always be a <code>create_inst</code> that exposes the size and also the constructor. Referencing the game's singleton objects is also easy, I just replace the <code>inst()</code> implementation in my project:</p>
+<div class="highlight"><pre><span></span><span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">entity_manager</span><span class="o">*</span><span class="w"> </span><span class="n">inst</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+
+<span class="w">	  </span><span class="c1">// @Hardcode</span>
+<span class="w">	  </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">entity_manager</span><span class="o">**&gt;</span><span class="p">(</span><span class="mh">0x00910DC0</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+<p>When all references to it are replaced I can simply replace it with my own, but since we're dealing with pointers there's no reason to do so. Compared to Neversoft's Spider-Man where a lot of things live in global memory, dealing with just pointers is a blessing.</p>
+<h1>Custom _ftol</h1>
+<p>Floating point functions give me nightmares, they're so sensitive that any small change can have drastic effects. I tend to avoid them if possible. There was this very simple function:</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">hires_clock_t::wait_for</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">t</span><span class="p">)</span>
+
+<span class="p">{</span>
+<span class="w">	</span><span class="n">Sleep</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>If you're familiar with Win32 API you know that <code>Sleep</code> takes a <code>DWORD</code>, so the compiler introduces an implicit conversion. It'd look like:</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">hires_clock_t::wait_for</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">t</span><span class="p">)</span>
+
+<span class="p">{</span>
+<span class="w">	</span><span class="n">Sleep</span><span class="p">(</span><span class="n">_ftol</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+<p>Float-To-Long is the full name of the function that performs the conversion. Depending on your compiler settings it might not be emitted, but since precision is the default for MSVC it'll be there. The decompilation of <code>wait_for</code> was fine, the problem was <code>_ftol</code>. They were completely different. I spent hours playing around with compiler settings and type casting but it didn't help. I did find a very old StackOverflow post - <a href="https://stackoverflow.com/questions/20431671/porting-old-compiler-ftol-float-to-long-function-to-c">link</a> - where the poster was replicating the behaviour of an old program and getting different results on the floating point conversions. Could be an OG decomper :)</p>
+<p>The assembly snippet in the post was very similar and it even had a link to <code>SDL_stdlib.c</code> which had a slightly more verbose version of the game's <code>_ftol</code>. Out of ideas I posted on the decomp.me Discord Server. Once again <code>tomsons26</code> solved this mystery for me. It's a <code>_ftol</code> implementation from newer Visual Studio editions that had been backported and optimized by Treyarch. To replace the one used by the compiler you just have to declare a <code>__declspec(naked) void __ftol()</code> and it'll use that.  He also taught me something very interesting. Since the code in the binary is mixed with other game code then it was implemented through inline assembly, if it had been closer to library code it'd been linked from an external object.</p>
+<p>Here's how it looks like in my project - <a href="https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/dllmain.cpp#L21-L66">link</a>. By the way, I love that in typical StackOverflow fashion the first comment to the question was asking the OP why he wanted matching behaviour.</p>
+<h1>Size of bool</h1>
+<p>Common knowledge says that a <code>bool</code> is backed by an <code>unsigned char</code>/<code>char</code> which is 8 bits and the generated code also makes use of 8-bit registers. Here's an example:</p>
+<div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">my_func</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Would generate the following assembly:</p>
+<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="nf">ret</span>
+</pre></div>
+<p>Similar thing would happen for functions that call <code>my_func()</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">my_func</span><span class="p">())</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// something happens here</span>
+<span class="p">}</span>
+</pre></div>
+<p>Would generate:</p>
+<div class="highlight"><pre><span></span><span class="nf">call</span><span class="w"> </span><span class="no">my_func</span>
+<span class="nf">test</span><span class="w"> </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="no">al</span>
+</pre></div>
+<p>But there's some instances where it doesn't hold true. Take for example this function:</p>
+<div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">link_interface::is_a_parent</span><span class="p">(</span><span class="n">bone</span><span class="w"> </span><span class="o">*</span><span class="n">pBone</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">my_parent</span><span class="p">)</span>
+<span class="w">		</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">my_parent</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">pBone</span>
+<span class="w">				</span><span class="o">||</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">my_parent</span><span class="o">-&gt;</span><span class="n">has_link_ifc</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">                </span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">my_parent</span><span class="o">-&gt;</span><span class="n">link_ifc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">is_a_parent</span><span class="p">(</span><span class="n">pBone</span><span class="p">)));</span>
+
+<span class="p">}</span>
+</pre></div>
+<p>First, let's disregard the whole <code>link_ifc</code> stuff, it's Treyarch take on abstract interfaces and on itself could warrant a whole section. This function returns a <code>bool</code>, but its epilogue writes to a 32-bit register.</p>
+<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="nf">ret</span>
+
+<span class="nf">xor</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="nf">ret</span>
+</pre></div>
+<p>My first instinct was to replace the return type with <code>int</code> but all calling functions were operating on 8-bit registers. Not sure if you noticed, but it's a recursive function which makes it more confusing. Why write the result to 32-bit register if when it calls itself it only checks 8 bits?</p>
+<p>The odd way it's written is why it happens. At first I had the conditions broken into multiple if-else statements and prologue was using 8-bit registers as expected. Concatenating all of them into a single expression causes MSVC to generate different assembly for some reason.</p>
+<p>On the other hand, the way you compare with a <code>bool</code> also affects code generation, but this time it's deterministic.</p>
+<ul>
+<li><code>if (my_bool)</code> would generate <code>test al, al</code></li>
+<li><code>if (my_bool == true)</code> would generate <code>cmp al, 1</code></li>
+</ul>
+<p>This is pure speculation, but I believe the reason is due to truthiness. Truthiness is a concept that explains how non-boolean types are evaluated in boolean contexts. For integers any value that's not zero is true. In Python, an empty list evaluates to <code>False</code>.</p>
+<p>If <code>bool</code> is not a first-order concept to the compiler then it'll be implemented being backed by an <code>int</code> or <code>char</code> which share the same truthiness. That's why the two statements above generate different code. First one is checking for truthiness while the second is explicitly comparing to <code>true</code> which is often defined as one.</p>
+<h1>Debugging horror stories</h1>
+<p>Even though the progress has been steady, sometimes I manage to find myself with a bug that stumps me. Here's a couple that made me facepalm.</p>
+<h2>Hooking function causes infinite loop</h2>
+<p>I just finished decompiling a couple functions and now it was time to validate. I boot the game and it hangs. Through trial and error I find the hook that was causing it. In the debugger, I step into the function and I'm extremely confused. The code was as such:</p>
+<div class="highlight"><pre><span></span><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ecx</span><span class="p">]</span>
+<span class="nf">jmp</span><span class="w"> </span><span class="p">[</span><span class="no">eax</span><span class="err">+</span><span class="no">OFFSET</span><span class="p">]</span>
+</pre></div>
+<p>It was jumping to itself and even more confusing I knew the function wasn't recursive. Why was my hook going into here? I even opened my DLL in the disassembler to see if it wasn't a hallucination. Turns out this was very simple and I even had written about this in a <a href="../spidey-decomp-status-july">previous post</a>. When referencing a <code>virtual</code> function through a pointer, it will point to a stub that resolves the function through the virtual table, as seen in the assembly snippet.
+I was hooking the function like so <code>PATCH_PUSH_RET(0x004A09D0, signaller::raise_signal);</code> which made that function point to the stub and cause the infinite loop. </p>
+<p>The solution was to use the export based approach <code>PATCH_PUSH_RET_POLY(0x004A09D0, signaller::raise_signal, &quot;?raise_signal@signaller@@UAEXI@Z&quot;);</code> that makes use of dynamic symbol resolution to get the address.
+I knew about this, I had written about it and still managed to get stuck with a simple bug. Moral of the story, always hook virtual functions through the exports <strong>NEVER</strong> through function pointers.</p>
+<p>I had fixed it, but now I had a question - why does MSVC generate these stubs for virtual functions? I posted on the decomp.me Discord server and the user <code>Ethanol</code> quickly replied that it was for the inherited classes properly resolve the function. Of course! The tunnel vision was so strong here, that I got stuck debugging a simple issue and couldn't reason through it.</p>
+<h1>Sneaky inline</h1>
+<p>There's this very handy class in the game called <code>errorcontext</code>. It's a manual trace that exposes two functions <code>push_context(const stringx&amp;)</code> and <code>pop_context()</code>. In case of error you can call <code>get_context()</code> to get a trace of contexts in the following format: <code>[context1]-&gt;[context2]-&gt;[context3]</code>. Basically a manual stack trace.</p>
+<p>There's also a handy OOP wrapper called <code>ectx</code>. On the constructor it calls <code>push_context()</code> and the destructor calls <code>pop_context()</code>.</p>
+<p>I had finished decompiling both classes and went to validate. The game was crashing inside of <code>stringx</code> code which made it even more confusing. By commenting the hooks one by one I figured out the root cause was <code>push_context()</code>. Weirdly enough it only caused problems when explicitly hooked. When called through <code>ectx</code> it was working perfectly fine. The code for it was also stupidly simple:</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">error_context::push_context</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="p">)</span><span class="w"> </span>
+<span class="p">{</span><span class="w"> </span>
+<span class="w">	</span><span class="n">assert</span><span class="p">(</span><span class="w"> </span><span class="n">context_stack</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ECTX_STACK_SIZE</span><span class="w"> </span><span class="p">);</span>
+<span class="w">	</span><span class="n">context_stack</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p><code>context_stack</code> is a <code>vector&lt;stringx&gt;</code>, so each push calls the copy constructor and that's where it was crashing. The failure was an invalid memory access and the address wasn't obviously wrong like a null pointer. Instrumenting the function didn't work either, it only made the code crash before reaching <code>push_back</code> - i.e tried to log the trace by calling <code>get_context()</code> but it'd crash.</p>
+<p>The function was very cursed so I decided to step away from the computer and do some chores. As soon as I was about to leave home, it struck me. What if my code is correct but I'm hooking the wrong thing? Something I had omitted so far is that <code>push_back</code> is inlined, so the function is not just a simple <code>jmp</code> or <code>call</code>. By carefully inspecting both mine and the game's code it jumped out to me, there was a constant four byte offset. I was tricked by what was actually inlined. Let me explain, functions defined in header files tend to be inlined by MSVC, that's why <code>push_back</code> was inlined. This was also the case for <code>push_context</code>, this meant that when you wrote code such as:</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">my_func</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">error_context</span><span class="o">::</span><span class="n">inst</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">push_context</span><span class="p">(</span><span class="s">&quot;my_func&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>It was actually doing:</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">my_func</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">vector</span><span class="o">::</span><span class="n">push_back</span><span class="p">(</span><span class="n">error_context</span><span class="o">::</span><span class="n">inst</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">context_stack</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_func&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>That's why there was a four byte offset, <code>context_stack</code> is located at offset 4 of the class. In the end, the solution was pretty simple:</p>
+<div class="highlight"><pre><span></span><span class="nb nb-Type">void</span><span class="w"> </span><span class="n">__fastcall</span><span class="w"> </span><span class="n">offseted_push_context</span><span class="p">(</span><span class="n">error_context</span><span class="o">*</span><span class="w"> </span><span class="n">this_ptr</span><span class="p">,</span><span class="w"> </span><span class="nb nb-Type">int</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">stringx</span><span class="o">&amp;</span><span class="w"> </span><span class="n">context</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">error_context</span><span class="w"> </span><span class="o">*</span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="n">error_context</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="nb nb-Type">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">this_ptr</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">fixed</span><span class="o">-&gt;</span><span class="n">push_context</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>Manually fix the <code>this</code> pointer and call my <code>push_context</code>.</p>
+<h1>Improvements to the workflow</h1>
+<p>I'm really proud of my validation framework. It supports both compile time and runtime assertions. The former is great when I have a class fully decompiled and I want to freeze it, while the latter is much more convenient for components actively being decompiled. The biggest advantage of runtime assertions is that they can provide useful error messages while compile time ones can only break build. Because of this I still prefer runtime assertions.</p>
+<p>The problem with runtime assertions is that I'm building a proxy DLL, so for each build I need to copy the DLL and run the game. This got annoying really quick. I only needed something to run my DLL, write any error messages to <code>stdout</code> and exit with the appropriate exit code so that it can be scriptable and used in CI. At that time, my DLL did everything on <code>DllMain</code>, this included patching the game.
+Any executable that wasn't the game that tried to load it would most likely crash or suffer from memory corruption. The solution was to check on load if I'm in the game's executable; if so do the usual, else do nothing. Also exported the <code>runtime_assertions</code> function so that the program that loads it can call it explicitly.</p>
+<p>Next challenge was the runner. Windows does have <code>rundll</code>, but I had to use a specific calling convention and it looked too hacky. So I opted to build my own tiny <code>rundll</code> just for this project. The first prototype used Python's <code>ctypes</code>, but it didn't work. Python was a 64-bit executable while the DLL was 32-bit, there's no easy way for them to interface. I had to explicitly build a 32-bit executable for this. Here's the <a href="https://github.com/krystalgamer/tobey-validator/blob/master/tobey_validator.cpp">final product</a> which I called <code>tobey_validator</code>. It simply loads a DLL, tries to resolve the function <code>runtime_assertions</code> and if it succeeds calls it and exits with the code returned by the function.</p>
+<p>Now I can run the validation from the terminal and also in CI - <a href="https://github.com/krystalgamer/open-tobey/blob/0debc8ddfb9f0fc0596b2b4fa52546fbab5f9d62/.github/workflows/c-cpp.yml#L40-L42">link</a>.</p>
+<h2>PANIC</h2>
+<p>A macro that will halt the execution of the program and write to debug log the name of the file and line. Did you know VC++6 doesn't support <code>__FUNCTION__</code>?
+It's useful when I'm making changes and I want to safeguard myself. It's also useful to mark functions that I haven't decompiled but might be called.</p>
+<h1>Closing words</h1>
+<p>This project has been coming along very nicely. The approach of hooking the game is so pleasant that I'm thinking about bringing it to my other decompilation project. The issue with that game is that it relies too much on global variables, which makes it quite finicky to work with (maybe linker scripts can help?). </p>
+<p>Once again, I need to thank the decomp.me Discord community for helping me so much with the problems I stumble upon. Progress wouldn't be as quick without them.</p>
+<p>Finally, I livestream my progress on my <a href="https://www.youtube.com/@kRySt4LGaMeR">YouTube channel</a> and if you're interested in contributing please check out the <a href="https://github.com/krystalgamer/open-tobey/">repository</a>.</p>
+
+	</div>
+
+
+		</main>
+
+		<footer class="container">
+			No rights reserved. All content released under CC0.
+		</footer>
+	</body>
+
+</html>
