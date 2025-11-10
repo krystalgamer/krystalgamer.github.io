@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Spider-Man: The Movie Game dissection project Checkpoint - November 2025"
-description: "Introducing open-tobey and what it means"
+description: "Progress report for the Spider-Man: The Movie Game dissection project - November 2025"
 created: 2025-11-09
 modified: 2025-11-10
 tags: [spider-man, tobey, open-tobey, decompilation, ida]
